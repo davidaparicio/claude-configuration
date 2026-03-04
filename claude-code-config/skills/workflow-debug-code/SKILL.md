@@ -1,5 +1,5 @@
 ---
-name: debug
+name: workflow-debug-code
 description: Systematic error debugging with analysis, solution discovery, and verification
 argument-hint: "[error description or context] [-a for auto mode]"
 ---

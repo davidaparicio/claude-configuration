@@ -31,6 +31,7 @@ next_step: steps/step-04-validate.md
 - TaskList has all tasks with dependencies
 - You have the plan from step-02
 - Implementation has NOT started
+- **If context was cleared ("Execute and clear context"):** The plan file contains all APEX state variables in the "APEX Workflow Context" section. Read the plan file first and restore all variables before proceeding.
 
 ## YOUR TASK:
 

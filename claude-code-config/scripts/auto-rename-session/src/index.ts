@@ -1,9 +1,5 @@
 import { join } from "node:path";
-import {
-	extractTextContent,
-	isRealUserMessage,
-	type TranscriptLine,
-} from "./shared";
+import { extractTextContent, isRealUserMessage } from "./shared";
 
 const SCRIPT_DIR = import.meta.dir;
 const LOG_FILE = join(SCRIPT_DIR, "..", "debug.log");
@@ -17,6 +13,21 @@ async function log(message: string) {
 			.text()
 			.catch(() => "")) + line,
 	);
+}
+
+function renameTmuxWindow(pane: string, title: string) {
+	if (!pane) return;
+	try {
+		Bun.spawnSync(["tmux", "rename-window", "-t", pane, title]);
+		Bun.spawnSync([
+			"tmux",
+			"set-window-option",
+			"-t",
+			pane,
+			"automatic-rename",
+			"off",
+		]);
+	} catch {}
 }
 
 interface HookInput {
@@ -41,17 +52,17 @@ async function main() {
 	const transcriptContent = await Bun.file(input.transcript_path).text();
 	const lines = transcriptContent.trim().split("\n");
 
-	let hasCustomTitle = false;
+	let customTitle: string | null = null;
 	let firstUserMessage = "";
 	let firstAssistantResponse = "";
 	let foundUser = false;
 
 	for (const line of lines) {
 		try {
-			const parsed: TranscriptLine = JSON.parse(line);
+			const parsed = JSON.parse(line);
 
 			if (parsed.type === "custom-title") {
-				hasCustomTitle = true;
+				customTitle = parsed.customTitle || "";
 				break;
 			}
 
@@ -76,14 +87,24 @@ async function main() {
 		} catch {}
 	}
 
+	const tmuxPane = process.env.TMUX_PANE ?? "";
+
 	await log(
-		`hasCustomTitle=${hasCustomTitle}, firstUserMessage="${firstUserMessage.slice(0, 50)}..."`,
+		`customTitle="${customTitle}", firstUserMessage="${firstUserMessage.slice(0, 50)}...", tmuxPane="${tmuxPane}"`,
 	);
 
-	if (hasCustomTitle || !firstUserMessage) {
-		await log(
-			`Skipping: hasCustomTitle=${hasCustomTitle}, noFirstUserMessage=${!firstUserMessage}`,
-		);
+	if (customTitle !== null) {
+		if (customTitle) {
+			renameTmuxWindow(tmuxPane, customTitle);
+			await log(`Renamed tmux window to existing title: "${customTitle}"`);
+		} else {
+			await log("Title was already attempted (empty marker), skipping");
+		}
+		process.exit(0);
+	}
+
+	if (!firstUserMessage) {
+		await log("No real user message found, exiting");
 		process.exit(0);
 	}
 
@@ -98,6 +119,7 @@ async function main() {
 			input.transcript_path,
 			firstUserMessage.slice(0, 400),
 			firstAssistantResponse.slice(0, 300),
+			tmuxPane,
 		],
 		{
 			stdio: ["ignore", "ignore", "ignore"],

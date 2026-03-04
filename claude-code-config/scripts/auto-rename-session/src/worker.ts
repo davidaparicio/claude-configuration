@@ -16,8 +16,13 @@ async function log(message: string) {
 	);
 }
 
-const [sessionId, transcriptPath, firstUserMessage, firstAssistantResponse] =
-	process.argv.slice(2);
+const [
+	sessionId,
+	transcriptPath,
+	firstUserMessage,
+	firstAssistantResponse,
+	tmuxPane,
+] = process.argv.slice(2);
 
 await log(`Worker started: sessionId=${sessionId}`);
 
@@ -47,8 +52,30 @@ async function main() {
 			`${transcriptContent + createCustomTitleLine(title, sessionId)}\n`,
 		);
 		await log("Title written successfully");
+
+		if (tmuxPane) {
+			try {
+				Bun.spawnSync(["tmux", "rename-window", "-t", tmuxPane, title]);
+				Bun.spawnSync([
+					"tmux",
+					"set-window-option",
+					"-t",
+					tmuxPane,
+					"automatic-rename",
+					"off",
+				]);
+				await log(`Tmux window renamed to "${title}"`);
+			} catch (e: any) {
+				await log(`Tmux rename failed: ${e?.message || e}`);
+			}
+		}
 	} else {
-		await log(`Skipping: title too short or empty`);
+		await log(`No usable title, writing skip marker`);
+		const transcriptContent = await Bun.file(transcriptPath).text();
+		await Bun.write(
+			transcriptPath,
+			`${transcriptContent + JSON.stringify({ type: "custom-title", customTitle: "", sessionId })}\n`,
+		);
 	}
 }
 

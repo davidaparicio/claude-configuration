@@ -24,19 +24,33 @@ export function extractTextContent(content: string | ContentBlock[]): string {
 
 export function isRealUserMessage(content: string): boolean {
 	if (!content) return false;
-	if (content.startsWith("Caveat:")) return false;
-	if (content.startsWith("<command-")) return false;
-	if (content.startsWith("<local-command")) return false;
-	if (content.trim().length < 5) return false;
+	const trimmed = content.trim();
+	if (trimmed.length < 5) return false;
 
-	// Detect skill/workflow prompt expansions - these are NOT real user messages
-	if (content.startsWith("Base directory for this skill:")) return false;
-	if (content.includes("<objective>")) return false;
-	if (content.includes("<quick_start>")) return false;
-	if (content.includes("<parameters>")) return false;
-	if (content.includes("<workflow>")) return false;
-	if (content.includes("<step_files>")) return false;
-	if (content.includes("<execution_rules>")) return false;
+	// System/internal messages
+	if (trimmed.startsWith("Caveat:")) return false;
+	if (trimmed.startsWith("<command-")) return false;
+	if (trimmed.startsWith("<local-command")) return false;
+	if (trimmed.startsWith("<teammate-message")) return false;
+	if (trimmed.startsWith("<bash-input>")) return false;
+	if (/^\[Request interrupted/.test(trimmed)) return false;
+	if (/^\[Image:/.test(trimmed)) return false;
+
+	// File-reference-only messages (Ralph tasks, etc.)
+	if (/^@\//.test(trimmed)) return false;
+
+	// Too vague single-word messages
+	if (/^(continue|ok|yes|no|done|next|stop)$/i.test(trimmed)) return false;
+
+	// Detect skill/workflow prompt expansions
+	if (trimmed.startsWith("Base directory for this skill:")) return false;
+	if (/^#\s+\w+\s+Skill\b/.test(trimmed)) return false;
+	if (trimmed.includes("<objective>")) return false;
+	if (trimmed.includes("<quick_start>")) return false;
+	if (trimmed.includes("<parameters>")) return false;
+	if (trimmed.includes("<workflow>")) return false;
+	if (trimmed.includes("<step_files>")) return false;
+	if (trimmed.includes("<execution_rules>")) return false;
 
 	return true;
 }

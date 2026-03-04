@@ -1,219 +1,140 @@
 ---
 name: review-code
-description: This skill should be used when the user asks to "review code", "review this PR", "code review", "audit this code", or mentions reviewing pull requests, security checks, or code quality. Covers security (OWASP), clean code (SOLID), code smells, complexity metrics, and high-value feedback patterns. Focuses on impactful issues, not nitpicks.
+description: This skill should be used when the user asks to "review code", "review this PR", "code review", "audit this code", or mentions reviewing pull requests, security checks, or code quality. Multi-agent deep review - dynamically scopes code, launches parallel specialized Opus agents (security, clean-code, UX/UI, backend), each loading domain-specific references. Focuses on high-impact issues, not nitpicks.
+model: opus
+argument-hint: "[PR number or file paths]"
 ---
 
 <objective>
-Provide expert-level code review guidance that focuses on high-impact issues: security vulnerabilities, logic errors, maintainability problems, and architectural concerns. Skip nitpicks and style issues that should be automated.
-
-Based on research from Google, Microsoft, OWASP, and academic studies on code review effectiveness.
+Multi-agent code review orchestrator. Analyze the scope of changes, determine which review domains apply, then launch parallel specialized sub-agents (each on Opus) that load the right references for deep, domain-specific analysis.
 </objective>
 
-<quick_start>
-<review_priority>
-**Priority order**: Security > Correctness > Maintainability > Performance
+<workflow>
+## Phase 1: SCOPE - Analyze changes and determine review domains
 
-**High-value feedback** (36-43% implementation rate):
-- Bug fixes and logic errors
-- Security vulnerabilities
-- Readability/maintainability issues
-- Missing error handling
+1. **Get the diff.** Determine what to review:
+   - If user provided a PR number: `gh pr diff {number}`
+   - If user provided file paths: `git diff` on those files
+   - If nothing specified: `git diff` (unstaged) + `git diff --cached` (staged)
+   - If no local changes: ask user what to review
 
-**Skip these** (automate instead):
-- Formatting/whitespace
-- Simple naming conventions
-- Linting violations
-</review_priority>
+2. **Categorize changed files** into domains by scanning extensions and paths:
 
-<essential_checks>
-1. **Security**: Input validation, auth checks, secrets exposure
-2. **Logic**: Edge cases, error handling, null checks
-3. **Architecture**: Single responsibility, proper abstractions
-4. **Tests**: Coverage for new functionality
-</essential_checks>
-</quick_start>
+| Domain | Signals |
+|--------|---------|
+| **frontend** | `.tsx`, `.jsx`, `.css`, `.scss`, `components/`, `pages/`, `app/`, `ui/` |
+| **backend** | `.ts`/`.js` in `api/`, `server/`, `routes/`, `middleware/`, `lib/`, `services/`, `prisma/`, `drizzle/` |
+| **security-sensitive** | Auth files, middleware, API routes, env handling, crypto, payments |
+| **database** | Migration files, schema files, ORM models, raw SQL |
+| **tests** | `.test.`, `.spec.`, `__tests__/`, `vitest`, `jest` |
+| **config** | `.config.`, `package.json`, `tsconfig`, CI/CD files |
 
-<review_categories>
-<category name="security" priority="critical">
-**Must check in every review:**
-- No hardcoded credentials (search: `password.*=.*['"]`, `api[_-]?key.*=`)
-- Input validation on all user data
-- Parameterized queries (no string concatenation for SQL)
-- Authorization checks on every endpoint
-- No `eval()`, `exec()`, dangerous functions
+3. **Determine review agents to launch** based on domains detected:
 
-See [references/security-checklist.md](references/security-checklist.md) for OWASP Top 10 patterns.
-</category>
+| Condition | Agent | Focus | Reference to load |
+|-----------|-------|-------|-------------------|
+| Always (if >0 non-test files) | **Clean Code** | SOLID, complexity, code smells | `references/clean-code-principles.md` + `references/code-quality-metrics.md` |
+| Backend or security-sensitive files | **Security** | OWASP, auth, injection, secrets | `references/security-checklist.md` |
+| Frontend files (.tsx/.jsx/.css) | **UX/UI** | Accessibility, responsive, UX patterns | `references/ux-ui-checklist.md` |
+| Backend files (API, DB, services) | **Backend** | API design, DB patterns, error handling | `references/backend-patterns.md` |
+| Test files changed | **Tests** | Coverage gaps, test quality | (inline guidance) |
 
-<category name="logic" priority="critical">
-**Verify correctness:**
-- Business logic matches requirements
-- Edge cases handled (null, empty, boundary values)
-- Error handling present and appropriate
-- Race conditions in async code
-- Resource cleanup (connections, file handles)
-</category>
+4. **Determine review scale:**
+   - Small (1-5 files): 1-2 agents
+   - Medium (6-15 files): 2-3 agents
+   - Large (16+ files): 3-5 agents (full coverage)
 
-<category name="clean_code" priority="high">
-**Check for code smells:**
-- Large functions (>50 lines) - violate Single Responsibility
-- Deep nesting (>3 levels) - extract to functions
-- Long parameter lists (>3 params) - use objects
-- Duplicated code - extract to shared functions
-- Magic numbers/strings - use named constants
+## Phase 2: DISPATCH - Launch parallel specialized review agents
 
-See [references/clean-code-principles.md](references/clean-code-principles.md) for SOLID principles and code smells.
-</category>
+Launch all determined agents **in parallel** using the Task tool with `subagent_type: "code-reviewer"` and `model: "opus"`.
 
-<category name="maintainability" priority="medium">
-**Assess long-term health:**
-- Cognitive complexity <15 per function
-- Clear naming that reveals intent
-- Appropriate abstractions (not over-engineered)
-- Test coverage for critical paths
-</category>
-</review_categories>
+Each agent gets a structured prompt following this template:
 
-<feedback_guidelines>
-<valuable_feedback>
-**Structure**: What + Why + How
+```xml
+<review_request>
+  <focus_area>{domain}</focus_area>
+  <reference_files>
+    <file>{SKILL_PATH}/references/{reference-file}.md</file>
+  </reference_files>
+  <changed_files>
+    <file path="src/example.ts" />
+  </changed_files>
+  <diff_context>
+{paste relevant portions of the diff for this domain's files}
+  </diff_context>
+  <pr_context>
+    <title>{PR title if available}</title>
+    <description>{PR description if available}</description>
+  </pr_context>
+</review_request>
 
-✓ "This function is 80 lines with 5 responsibilities. Consider extracting the validation logic (lines 20-45) into `validateUserInput()` for testability."
-
-✓ "SQL query uses string concatenation (line 34). Use parameterized queries to prevent injection: `db.query('SELECT * FROM users WHERE id = ?', [userId])`"
-
-✓ "Missing null check on `user.profile` (line 52). This will throw if user hasn't completed onboarding. Add: `if (!user.profile) return defaultProfile;`"
-</valuable_feedback>
-
-<wasteful_feedback>
-✗ "This could be cleaner" (vague)
-✗ "Rename this variable" (nitpick - use linter)
-✗ "Add a comment here" (if code is clear, no comment needed)
-✗ "I would do this differently" (subjective without reason)
-</wasteful_feedback>
-
-<priority_labels>
-Use clear labels to distinguish severity:
-- **[BLOCKING]**: Must fix before merge (security, bugs)
-- **[SUGGESTION]**: Would improve code but not required
-- **[NIT]**: Minor preference (mark clearly or skip entirely)
-</priority_labels>
-
-See [references/feedback-patterns.md](references/feedback-patterns.md) for communication strategies.
-</feedback_guidelines>
-
-<code_quality_metrics>
-<metric name="cognitive_complexity">
-- Target: <15 per function, <50 per module
-- Each nesting level adds complexity
-- Prefer early returns over deep nesting
-</metric>
-
-<metric name="function_size">
-- Target: <50 lines, ideally <20
-- Should fit on one screen
-- One function = one responsibility
-</metric>
-
-<metric name="cyclomatic_complexity">
-- Target: <10 per function
-- Count: 1 + (if + while + for + case + catch + && + ||)
-- High complexity = hard to test
-</metric>
-
-See [references/code-quality-metrics.md](references/code-quality-metrics.md) for detailed calculations.
-</code_quality_metrics>
-
-<anti_patterns>
-<pattern name="nitpicking">
-**Problem**: Excessive minor comments bury critical issues
-**Impact**: Developers become defensive, stop reading feedback
-**Solution**: Automate style with linters; focus humans on logic/security
-</pattern>
-
-<pattern name="vague_criticism">
-**Problem**: "This is wrong" without explanation
-**Impact**: Developer doesn't know how to fix; creates friction
-**Solution**: Always include What + Why + How
-</pattern>
-
-<pattern name="blocking_on_preferences">
-**Problem**: Blocking merge for subjective style preferences
-**Impact**: Delays delivery; damages team trust
-**Solution**: Reserve blocking for security/correctness only
-</pattern>
-
-<pattern name="reviewing_unchanged_code">
-**Problem**: Commenting on code outside the PR diff
-**Impact**: Scope creep; unfair to author
-**Solution**: Focus only on changed lines; file separate issues for existing problems
-</pattern>
-</anti_patterns>
-
-<react_nextjs_review>
-## React/Next.js Codebase Detection
-
-**When reviewing a React or Next.js project**, launch an additional parallel agent for Vercel React best practices.
-
-<detection>
-**Detect React/Next.js codebase by checking:**
-- `package.json` contains `"next"` or `"react"` dependencies
-- Files with `.tsx`, `.jsx` extensions in changes
-- `next.config.js` or `next.config.ts` exists
-- `app/` or `pages/` directory structure (Next.js)
-</detection>
-
-<parallel_agent>
-**If React/Next.js detected, launch parallel agent:**
-
-```yaml
-agent:
-  type: code-reviewer
-  focus: "vercel-react-best-practices"
-  task: |
-    Review the recent code changes using Vercel React best practices.
-    Focus on:
-    - Eliminating waterfalls (async patterns, Promise.all)
-    - Bundle size optimization (dynamic imports, barrel files)
-    - Server-side performance (caching, serialization)
-    - Re-render optimization (memoization, state management)
-    - Rendering performance patterns
-
-    Use the /vercel-react-best-practices skill as reference.
-    Report findings with [BLOCKING], [SUGGESTION], or [NIT] labels.
+INSTRUCTIONS:
+1. Read EACH reference file listed in <reference_files> - these contain your domain-specific checklists
+2. Read EACH file listed in <changed_files> completely
+3. Apply the checklist from the reference against the actual code
+4. For EACH issue found, provide: Severity | Issue | Location (file:line) | Why It Matters | Concrete Fix
+5. Only report issues with confidence >= 80. No nitpicks, no style comments.
+6. Use severity labels: BLOCKING (must fix) | CRITICAL (strongly recommended) | SUGGESTION (optional improvement)
 ```
 
-**Execution:**
-1. Check for React/Next.js in `package.json`
-2. If detected, use Task tool to launch parallel agent:
-   ```
-   Task tool with subagent_type="code-reviewer":
-   "Review recent changes against Vercel React best practices from /vercel-react-best-practices skill.
-   Focus on: async patterns, bundle optimization, server performance, re-renders.
-   Check changed files for violations of rules like async-parallel, bundle-barrel-imports,
-   server-cache-react, rerender-memo. Report with priority labels."
-   ```
-3. Merge findings into main review output
-</parallel_agent>
-</react_nextjs_review>
+**Agent naming convention:** `review-{domain}` (e.g., `review-security`, `review-ux-ui`, `review-clean-code`, `review-backend`)
 
-<success_criteria>
-A good code review:
-- Identifies security vulnerabilities (if any)
-- Catches logic errors and edge cases
-- Flags maintainability issues with specific fixes
-- Uses priority labels ([BLOCKING] vs [SUGGESTION])
-- Provides actionable feedback (What + Why + How)
-- Avoids nitpicks on style/formatting
-- Completes in reasonable time (<4 hours for small PRs)
-- **[React/Next.js]** Includes Vercel best practices review when applicable
-</success_criteria>
+**If a best-practice skill exists** for the detected tech stack (e.g., `vercel-react-best-practices` for Next.js/React), include it in the prompt: tell the agent to also load that skill via the Skill tool for additional framework-specific checks.
 
-<reference_guides>
-For detailed guidance and patterns:
+## Phase 3: CONSOLIDATE - Merge and present findings
 
-- **`references/security-checklist.md`** - OWASP Top 10, authentication patterns, input validation, common vulnerabilities
-- **`references/clean-code-principles.md`** - SOLID principles, naming conventions, function design, code smell detection
-- **`references/feedback-patterns.md`** - Valuable vs wasteful feedback patterns, communication strategies, priority labeling
-- **`references/code-quality-metrics.md`** - Complexity calculations, maintainability index, measurement techniques
-</reference_guides>
+After all agents complete:
+
+1. **Collect all findings** from each agent
+2. **Deduplicate**: If multiple agents flagged the same issue, keep the most detailed one
+3. **Sort by severity**: BLOCKING first, then CRITICAL, then SUGGESTION
+4. **Present the unified report:**
+
+```markdown
+# Code Review Report
+
+**Scope**: {X files across Y domains}
+**Agents dispatched**: {list of agents launched}
+
+## BLOCKING Issues (must fix before merge)
+{consolidated blocking issues table}
+
+## CRITICAL Issues (strongly recommended)
+{consolidated critical issues table}
+
+## SUGGESTIONS (optional improvements)
+{consolidated suggestions table}
+
+## Summary
+{2-3 sentence overview of code health}
+{Verdict: APPROVE / APPROVE WITH COMMENTS / REQUEST CHANGES}
+```
+
+5. **Verdict logic:**
+   - Any BLOCKING issue → REQUEST CHANGES
+   - Only CRITICAL + SUGGESTION → APPROVE WITH COMMENTS
+   - No issues or only minor SUGGESTIONS → APPROVE
+</workflow>
+
+<execution_rules>
+- ALWAYS launch at minimum 1 agent, maximum 5
+- ALWAYS use `model: "opus"` for sub-agents
+- ALWAYS pass the relevant reference file paths so agents can Read them
+- ALWAYS include the actual diff context in the agent prompt (not just file paths)
+- NEVER skip the scoping phase - it determines which agents are needed
+- If the change is tiny (1-2 files, <50 lines), you MAY do a single-agent review with general focus instead of multi-agent
+- Each agent should complete independently - they don't need to communicate with each other
+</execution_rules>
+
+<reference_files>
+Domain-specific checklists loaded by sub-agents:
+
+| Reference | Domain | Content |
+|-----------|--------|---------|
+| `references/security-checklist.md` | Security | OWASP Top 10, auth, injection, input validation, secrets |
+| `references/clean-code-principles.md` | Clean Code | SOLID, code smells, function design, naming |
+| `references/code-quality-metrics.md` | Clean Code | Complexity metrics, maintainability index, thresholds |
+| `references/ux-ui-checklist.md` | UX/UI | Accessibility (WCAG), responsive design, UX patterns, loading states |
+| `references/backend-patterns.md` | Backend | API design, database, error handling, concurrency, observability |
+| `references/feedback-patterns.md` | All | How to structure feedback (What + Why + Fix), priority labels |
+</reference_files>

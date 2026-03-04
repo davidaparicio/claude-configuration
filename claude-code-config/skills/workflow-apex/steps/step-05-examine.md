@@ -21,10 +21,12 @@ next_step: steps/step-06-resolve.md
 
 ## EXECUTION PROTOCOLS:
 
-- 🎯 Launch parallel review agents (unless economy_mode)
+- 🎯 Launch 3+ parallel review agents via Task tool in ONE message (unless economy_mode)
+- 🛑 NEVER launch only 1 review agent — you MUST launch Security + Logic + Clean Code as separate agents
 - 💾 Document all findings with severity
 - 📖 Create todos for each finding
 - 🚫 FORBIDDEN to skip security analysis
+- 🚫 FORBIDDEN to combine review categories into a single agent
 
 ## CONTEXT BOUNDARIES:
 
@@ -103,38 +105,80 @@ Group files: source, tests, config, other.
 ```
 
 **If `{economy_mode}` = false:**
-→ Launch parallel review agents
+→ Launch parallel review agents using the **Task tool**
 
-**CRITICAL: Launch ALL in a SINGLE message:**
+**🛑 CRITICAL: You MUST launch ALL 3 agents (or 4 if Next.js) in a SINGLE message using MULTIPLE Task tool calls. DO NOT launch them one at a time. DO NOT use only 1 agent. Each agent reviews a DIFFERENT aspect.**
 
-**Agent 1: Security** (`code-reviewer`)
-```
-Review for OWASP Top 10:
-- Injection flaws
-- Auth/authz issues
-- Data exposure
-- Security misconfiguration
+First, gather the list of modified files:
+```bash
+git diff --name-only HEAD~1
 ```
 
-**Agent 2: Logic** (`code-reviewer`)
+Then, in **ONE message with 3+ parallel Task tool calls**, launch:
+
+---
+
+**Agent 1: Security Review** — `subagent_type: "code-reviewer"`
 ```
-Review for:
-- Edge cases not handled
-- Race conditions
-- Null handling
-- Incorrect logic
+prompt: |
+  You are a SECURITY reviewer. Review ONLY the following files for security vulnerabilities:
+  {list of modified files}
+
+  Focus exclusively on:
+  - OWASP Top 10: injection flaws (SQL, command, XSS)
+  - Authentication and authorization issues
+  - Sensitive data exposure (secrets, tokens, PII in logs)
+  - Security misconfiguration
+  - Insecure deserialization
+  - Missing input validation at system boundaries
+
+  For each finding, provide: file:line, severity (CRITICAL/HIGH/MEDIUM/LOW), description, and suggested fix.
+  If no security issues found, explicitly state "No security issues found."
 ```
 
-**Agent 3: Clean Code** (`code-reviewer`)
+---
+
+**Agent 2: Logic & Edge Cases Review** — `subagent_type: "code-reviewer"`
 ```
-Review for:
-- SOLID violations
-- Code smells
-- Complexity issues
-- Duplication >20 lines
+prompt: |
+  You are a LOGIC reviewer. Review ONLY the following files for logic correctness:
+  {list of modified files}
+
+  Focus exclusively on:
+  - Edge cases not handled (empty arrays, null/undefined, boundary values)
+  - Race conditions and concurrency issues
+  - Incorrect conditional logic or off-by-one errors
+  - Missing error handling for failure modes
+  - State management bugs
+  - Incorrect assumptions about data shape or types
+
+  For each finding, provide: file:line, severity (CRITICAL/HIGH/MEDIUM/LOW), description, and suggested fix.
+  If no logic issues found, explicitly state "No logic issues found."
 ```
 
-**Agent 4: Vercel/Next.js Best Practices** (CONDITIONAL)
+---
+
+**Agent 3: Clean Code & Quality Review** — `subagent_type: "code-reviewer"`
+```
+prompt: |
+  You are a CLEAN CODE reviewer. Review ONLY the following files for code quality:
+  {list of modified files}
+
+  Focus exclusively on:
+  - SOLID principle violations
+  - Code smells (long methods, god objects, feature envy)
+  - Cyclomatic complexity > 10
+  - Code duplication > 20 lines
+  - Naming that doesn't communicate intent
+  - Functions doing too many things
+
+  For each finding, provide: file:line, severity (CRITICAL/HIGH/MEDIUM/LOW), description, and suggested fix.
+  If no quality issues found, explicitly state "No quality issues found."
+```
+
+---
+
+**Agent 4: Vercel/Next.js Best Practices** (CONDITIONAL — launch alongside Agents 1-3)
 
 → **Detection:** Check if modified files match Next.js/Vercel patterns:
 ```
@@ -146,22 +190,32 @@ Review for:
 - Server components, client components
 ```
 
-→ **If Next.js/Vercel code detected:**
+→ **If Next.js/Vercel code detected:** Add a 4th parallel Task tool call:
 
-Launch additional agent using Skill tool:
-```yaml
-skill: "vercel-react-best-practices"
+`subagent_type: "code-reviewer"`
+```
+prompt: |
+  You are a NEXT.JS / REACT PERFORMANCE reviewer. Review ONLY the following files:
+  {list of modified files}
+
+  Focus exclusively on:
+  - Sequential awaits that should use Promise.all for parallel fetching
+  - Barrel imports causing bundle bloat (import from index files)
+  - Missing dynamic imports for heavy client components
+  - Server-side caching opportunities (React cache, unstable_cache)
+  - Unnecessary re-renders (missing memo, useMemo, useCallback)
+  - Wrong Server vs Client component boundaries
+  - Data fetching patterns (preloading, parallel fetching, waterfall detection)
+
+  For each finding, provide: file:line, severity (CRITICAL/HIGH/MEDIUM/LOW), description, and suggested fix.
+  If no performance issues found, explicitly state "No performance issues found."
 ```
 
-This agent reviews for:
-- Async parallel patterns (Promise.all vs sequential awaits)
-- Bundle optimization (barrel imports, dynamic imports)
-- Server-side caching (React cache, unstable_cache)
-- Re-render optimization (memo, useMemo, useCallback usage)
-- Server vs Client component boundaries
-- Data fetching patterns (preloading, parallel fetching)
+→ **If NOT Next.js/Vercel code:** Skip this agent (launch only Agents 1-3)
 
-→ **If NOT Next.js/Vercel code:** Skip this agent
+---
+
+**🛑 REMINDER: You MUST have 3+ Task tool calls in a SINGLE response. If you only launched 1 agent, you are doing it WRONG. Go back and launch all agents.**
 
 ### 4. Classify Findings
 
@@ -258,10 +312,12 @@ Append to `{output_dir}/05-examine.md`:
 
 ## FAILURE MODES:
 
+❌ **CRITICAL**: Launching only 1 review agent instead of 3+ — each category (Security, Logic, Clean Code) MUST be a separate agent
+❌ Combining multiple review categories into a single agent prompt
 ❌ Skipping security review
 ❌ Not classifying by severity
 ❌ Auto-dismissing findings
-❌ Launching agents sequentially
+❌ Launching agents sequentially instead of in parallel
 ❌ Using subagents when economy_mode
 ❌ Skipping Vercel/Next.js review when React/Next.js files are modified
 ❌ **CRITICAL**: Not using AskUserQuestion for review → resolve/test transition
