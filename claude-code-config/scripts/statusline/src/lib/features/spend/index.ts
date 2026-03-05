@@ -1,5 +1,5 @@
 import type { HookInput } from "../../types";
-import { normalizeResetsAt } from "../../utils";
+import { getLocalDateString, normalizeResetsAt } from "../../utils";
 import {
 	addToPeriodCost,
 	getAllSessions,
@@ -31,7 +31,7 @@ export async function saveSessionV2(
 
 	const sessionId = input.session_id;
 	const newTotalCost = input.cost.total_cost_usd; // Cumulative from Claude Code
-	const today = new Date().toISOString().split("T")[0];
+	const today = getLocalDateString();
 	const normalizedPeriodId = currentResetsAt
 		? normalizeResetsAt(currentResetsAt)
 		: null;

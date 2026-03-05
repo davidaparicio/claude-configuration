@@ -11,20 +11,23 @@ next_step: steps/step-03-execute.md
 
 - 🛑 NEVER start implementing - that's step 3
 - 🛑 NEVER write or modify code in this step
+- 🛑 NEVER mark plan as "complete" BEFORE writing plan to `{output_dir}/02-plan.md` (if save_mode)
 - ✅ ALWAYS structure plan by FILE, not by feature
 - ✅ ALWAYS include specific line numbers from analysis
 - ✅ ALWAYS map acceptance criteria to file changes
 - ✅ ALWAYS create a TaskList using TaskCreate tool to track all planned file changes
+- ✅ IF save_mode: ALWAYS use Edit tool to write the full plan to `{output_dir}/02-plan.md` BEFORE showing summary
 - 📋 YOU ARE A PLANNER, not an implementer
 - 💬 FOCUS on "What changes need to be made where?"
-- 🚫 FORBIDDEN to use Edit, Write, or Bash tools
+- 🚫 FORBIDDEN to use Edit/Write on source code files (only on output files if save_mode)
 
 ## EXECUTION PROTOCOLS:
 
 - 🎯 ULTRA THINK before creating the plan
-- 💾 Save plan to output file (if save_mode)
+- 💾 IF save_mode: Use Edit tool to write the full plan to `{output_dir}/02-plan.md` AFTER creating the plan and BEFORE presenting summary
 - 📖 Reference patterns from step-01 analysis
 - 🚫 FORBIDDEN to proceed until user approves plan (unless auto_mode)
+- 🚫 FORBIDDEN to proceed to step-03 without saving plan first (if save_mode)
 
 ## CONTEXT BOUNDARIES:
 
@@ -160,9 +163,13 @@ questions:
 - Risk 1: [potential issue and mitigation]
 ```
 
-**If `{save_mode}` = true:** Append full plan to 02-plan.md
+**IF `{save_mode}` = true (MANDATORY - DO THIS NOW):**
 
-### 5. Create Team (if teams_mode — BEFORE TaskList)
+<critical>
+Use the **Edit tool** to write the FULL plan to `{output_dir}/02-plan.md`. Replace the placeholder content with the complete plan including all file changes, testing strategy, acceptance criteria mapping, and risks.
+</critical>
+
+### 5. Create Team (if teams_mode - BEFORE TaskList)
 
 <critical>
 If `{teams_mode}` = true, you MUST create the team BEFORE creating any tasks.
@@ -349,10 +356,12 @@ questions:
 
 ---
 
-### 10. Present Plan Summary
+### 10. Present Plan Summary & Approve
+
+**Always show the full plan summary (both auto and non-auto):**
 
 ```
-**Implementation Plan Ready**
+**Implementation Plan Ready: {task_description}**
 
 **Overview:** [1 sentence summary]
 
@@ -369,8 +378,135 @@ questions:
 - `file2.ts` - Minor changes (imports, single call)
 - `file1.test.ts` - New test file
 
-→ Proceeding to implementation...
+**Acceptance Criteria Coverage:**
+- [ ] AC1: Satisfied by changes in `file1.ts`
+- [ ] AC2: Satisfied by changes in `file2.ts`
+
+**Risks & Considerations:**
+- [Risk 1 and mitigation]
 ```
+
+---
+
+**If `{auto_mode}` = true:**
+→ Show the full summary above, then proceed directly to next step
+
+**If `{auto_mode}` = false:**
+
+<critical>
+Use EnterPlanMode / ExitPlanMode for plan approval — NOT AskUserQuestion.
+This gives the user proper plan review UI and supports "Execute and clear context".
+</critical>
+
+**Step 10a: Call `EnterPlanMode`**
+
+This transitions into plan mode so the user can review and approve.
+
+**Step 10b: Write the plan to the plan file**
+
+The system will provide a plan file path. Write the FULL plan to it, including APEX state for context survival.
+
+<critical>
+The plan file must contain ALL details from step 4 — do NOT strip sections.
+Include everything: Overview, Prerequisites, File Changes, Testing Strategy, Acceptance Criteria Mapping, Risks & Considerations, Key Decisions.
+</critical>
+
+```markdown
+# APEX Implementation Plan: {task_description}
+
+## APEX Workflow Context
+
+> **IMPORTANT:** This is an APEX workflow plan. If you are reading this after
+> "Execute and clear context", continue the APEX workflow by loading the next
+> step file listed below.
+
+### State Variables
+| Variable | Value |
+|----------|-------|
+| task_description | {task_description} |
+| task_id | {task_id} |
+| feature_name | {feature_name} |
+| auto_mode | {auto_mode} |
+| examine_mode | {examine_mode} |
+| save_mode | {save_mode} |
+| test_mode | {test_mode} |
+| economy_mode | {economy_mode} |
+| branch_mode | {branch_mode} |
+| pr_mode | {pr_mode} |
+| tasks_mode | {tasks_mode} |
+| teams_mode | {teams_mode} |
+| output_dir | {output_dir} |
+| branch_name | {branch_name} |
+
+### Next Step After Approval
+{if tasks_mode or teams_mode:}
+  Load `skills/workflow-apex/steps/step-02b-tasks.md`
+{else:}
+  Load `skills/workflow-apex/steps/step-03-execute.md`
+
+---
+
+## Plan Overview
+[1-2 sentence high-level strategy and approach]
+
+## Prerequisites
+- [ ] Prerequisite 1 (if any)
+- [ ] Prerequisite 2 (if any)
+
+## File Changes
+
+[Full file-by-file plan from step 4 — every file with specific actions, line references, patterns to follow, edge cases]
+
+## Testing Strategy
+
+**New tests:**
+- [test files to create with coverage details]
+
+**Update existing:**
+- [existing test files to modify]
+
+## Acceptance Criteria Mapping
+- [ ] AC1: Satisfied by changes in `file1.ts`
+- [ ] AC2: Satisfied by changes in `file2.ts`
+
+## Key Decisions
+- [Decision 1 from user responses or auto-decided]
+- [Decision 2 from user responses or auto-decided]
+
+## Risks & Considerations
+- [Risk 1: potential issue and mitigation]
+- [Risk 2: potential issue and mitigation]
+```
+
+**Step 10c: Call `ExitPlanMode`**
+
+Include appropriate allowedPrompts for execution:
+
+```yaml
+allowedPrompts:
+  - tool: Bash
+    prompt: "run build, typecheck, lint, test, and format commands"
+  - tool: Bash
+    prompt: "run git operations for branch management and commits"
+  - tool: Bash
+    prompt: "run APEX workflow scripts for progress tracking"
+```
+
+**Step 10d: Handle "Execute and clear context"**
+
+If the user chooses "Execute and clear context":
+- Context is cleared but the plan file survives
+- The agent re-reads the plan file on the next turn
+- The APEX Workflow Context section in the plan file tells the agent:
+  1. This is an APEX workflow — restore all state variables from the table
+  2. Load the next step file indicated in "Next Step After Approval"
+  3. Continue the workflow as normal
+
+<critical>
+The plan file MUST contain ALL state variables, the next step path, AND the full detailed plan.
+Without this, "Execute and clear context" breaks the APEX workflow.
+Never strip sections from the plan file — it must be the complete implementation reference.
+</critical>
 
 ### 11. Complete Save Output (if save_mode)
 
@@ -401,11 +537,14 @@ Append to `{output_dir}/02-plan.md`:
 ✅ **Task dependencies set with TaskUpdate (addBlockedBy)**
 ✅ Uncertainty points identified and addressed
 ✅ Smart, targeted questions asked (if not auto_mode and uncertainties exist)
+✅ **Plan approved via EnterPlanMode/ExitPlanMode (if not auto_mode)**
+✅ **Plan file contains APEX state variables for "Execute and clear context" survival**
 ✅ NO code written or modified
 ✅ Output saved (if save_mode)
 
 ## FAILURE MODES:
 
+❌ **CRITICAL**: Skipping file save when save_mode is true (proceeding without writing to 02-plan.md)
 ❌ Organizing by feature instead of file
 ❌ Vague actions like "add feature" or "fix issue"
 ❌ Missing test strategy
@@ -415,6 +554,8 @@ Append to `{output_dir}/02-plan.md`:
 ❌ **CRITICAL**: Asking generic "is this plan good?" questions
 ❌ **CRITICAL**: Asking about implementation details you can decide yourself
 ❌ **CRITICAL**: Not brainstorming uncertainties before asking questions
+❌ **CRITICAL**: Using AskUserQuestion for plan approval instead of EnterPlanMode/ExitPlanMode (when auto_mode=false)
+❌ **CRITICAL**: Plan file missing APEX state variables (breaks "Execute and clear context")
 
 ## PLANNING PROTOCOLS:
 
@@ -428,7 +569,13 @@ Append to `{output_dir}/02-plan.md`:
 
 ## NEXT STEP:
 
-After user approves via AskUserQuestion (or auto-proceed):
+**If `{auto_mode}` = true:** Proceed directly after plan summary.
+**If `{auto_mode}` = false:** Proceed after user approves via ExitPlanMode.
+
+**If "Execute and clear context" was chosen:**
+→ The agent re-reads the plan file, restores APEX state variables from the table, and loads the next step indicated in the plan file.
+
+**Routing:**
 
 **If `{tasks_mode}` = true OR `{teams_mode}` = true:**
 → Load `./step-02b-tasks.md` to generate task breakdown with dependencies
@@ -441,4 +588,6 @@ After user approves via AskUserQuestion (or auto-proceed):
 
 <critical>
 Remember: Planning is ONLY about designing the approach - save all implementation for step-03!
+When auto_mode=false, ALWAYS use EnterPlanMode/ExitPlanMode for approval — never AskUserQuestion.
+The plan file MUST contain APEX state variables so "Execute and clear context" works.
 </critical>
