@@ -4,9 +4,7 @@
     "CLAUDE_CODE_ENABLE_TASKS": "1",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
-  "includeCoAuthoredBy": false,
   "permissions": {
-    "allow": ["Edit", "Bash(git *)", "Bash(gh *)", "mcp__context7", "mcp__exa"],
     "deny": [
       "Bash(rm -rf *)",
       "Bash(sudo *)",
@@ -18,7 +16,6 @@
     "ask": ["Bash(*pr merge*)", "Bash(*prisma reset*)"],
     "defaultMode": "bypassPermissions"
   },
-  "model": "opus[1m]",
   "hooks": {
     "PreToolUse": [
       {
@@ -69,5 +66,7 @@
   "spinnerTipsEnabled": false,
   "autoUpdatesChannel": "latest",
   "skipDangerousModePermissionPrompt": true,
-  "effortLevel": "high"
+  "effortLevel": "high",
+  "includeCoAuthoredBy": false,
+  "model": "sonnet"
 }
