@@ -10,8 +10,8 @@ Use the local `exa-cli` installation to search the web, inspect URLs, and produc
 ## Quick Start
 
 Prefer `exa-cli` from `PATH`.
-If it is missing, check `/Users/melvynx/.local/bin/exa-cli`.
-The local project source is `/Users/melvynx/.cli/exa-cli`.
+If it is missing, check `~/.local/bin/exa-cli`.
+The optional local project source is `~/.cli/exa-cli`.
 
 Verify availability and auth before doing substantive work:
 
@@ -114,7 +114,7 @@ exa-cli answer query --query "What changed in Bun's package manager recently?" -
 
 If `exa-cli auth test` fails, tell the user the Exa token is missing or invalid and ask them to authenticate with `exa-cli auth set`.
 
-If the CLI is missing from `PATH`, try `/Users/melvynx/.local/bin/exa-cli` before assuming it is not installed.
+If the CLI is missing from `PATH`, try `~/.local/bin/exa-cli` before assuming it is not installed.
 
 If a query returns weak results:
 

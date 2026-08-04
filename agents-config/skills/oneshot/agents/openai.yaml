@@ -5,3 +5,6 @@ interface:
   icon_large: "./assets/codex-icon.svg"
   brand_color: "#CF80EF"
   default_prompt: "Use $oneshot to help with this task."
+
+policy:
+  allow_implicit_invocation: false

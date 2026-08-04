@@ -5,3 +5,6 @@ interface:
   icon_large: "./assets/codex-icon.svg"
   brand_color: "#E25932"
   default_prompt: "Use $crab-review to help with this task."
+
+policy:
+  allow_implicit_invocation: false

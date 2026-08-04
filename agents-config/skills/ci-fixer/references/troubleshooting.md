@@ -44,9 +44,8 @@ module.exports = {
 # Check if package is in dependencies (not devDependencies for production)
 cat package.json | jq '.dependencies'
 
-# Clear node_modules and reinstall
-rm -rf node_modules package-lock.json
-npm install
+# Reinstall exactly from the committed lockfile
+npm ci
 
 # For monorepos, check workspace configuration
 npm ls <package-name>

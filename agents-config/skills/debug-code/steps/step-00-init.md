@@ -60,6 +60,7 @@ Initialize all variables for the workflow:
 | `error_context` | Parsed from input |
 | `auto_mode` | Parsed from flags |
 | `error_analysis` | Empty (filled in step 1) |
+| `feedback_loop` | Empty (filled in step 1) |
 | `solutions` | Empty list (filled in step 2) |
 | `selected_solution` | Empty (filled in step 3) |
 | `files_modified` | Empty list (filled in step 4) |

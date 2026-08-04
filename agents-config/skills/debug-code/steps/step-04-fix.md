@@ -59,6 +59,10 @@ From previous steps:
 
 ### 2. Add Strategic Debug Logging (If Needed)
 
+Before changing production code, turn the minimized reproduction into a failing regression test when a correct seam exists. The test must exercise the real bug pattern as it occurs at the call site. Watch it fail before applying the fix.
+
+If no correct seam exists, record that as an architectural finding instead of adding a shallow test that cannot catch the bug.
+
 <critical>
 Only add logging if the fix involves complex logic or you need to verify intermediate values.
 Remove debug logs before finalizing!
@@ -72,10 +76,10 @@ Remove debug logs before finalizing!
 
 **Strategic logging pattern:**
 ```javascript
-console.log('[DEBUG] functionName:', { input, state, output });
-console.log('[DEBUG] processData: start', { data });
+console.log('[DEBUG-a4f2 functionName]', { input, state, output });
+console.log('[DEBUG-a4f2 processData:start]', { data });
 // ... logic
-console.log('[DEBUG] processData: end', { result });
+console.log('[DEBUG-a4f2 processData:end]', { result });
 ```
 
 **Track debug logs added:**
@@ -124,7 +128,7 @@ Remove ALL debug logs - both from this step AND from step-01b (Log Technique)!
 
 **Verification command:**
 ```bash
-grep -r "\[DEBUG" src/
+rg "\[DEBUG-[a-z0-9]+" src/
 ```
 
 ### 6. Complete Implementation

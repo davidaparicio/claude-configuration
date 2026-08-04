@@ -28,13 +28,13 @@ Log at the boundaries of the suspected problematic area:
 
 ```javascript
 // Entry point
-console.log('[DEBUG:entry] functionName called', {
+console.log('[DEBUG-a4f2 entry] functionName called', {
   timestamp: new Date().toISOString(),
   args: { param1, param2 }
 });
 
 // Exit point
-console.log('[DEBUG:exit] functionName completed', {
+console.log('[DEBUG-a4f2 exit] functionName completed', {
   timestamp: new Date().toISOString(),
   result: returnValue
 });
@@ -45,16 +45,16 @@ console.log('[DEBUG:exit] functionName completed', {
 Log at conditionals where behavior branches:
 
 ```javascript
-console.log('[DEBUG:decision] checking condition', {
+console.log('[DEBUG-a4f2 decision] checking condition', {
   condition: someValue,
   willTake: someValue > threshold ? 'if-branch' : 'else-branch'
 });
 
 if (someValue > threshold) {
-  console.log('[DEBUG:branch] took if-branch');
+  console.log('[DEBUG-a4f2 branch] took if-branch');
   // ...
 } else {
-  console.log('[DEBUG:branch] took else-branch');
+  console.log('[DEBUG-a4f2 branch] took else-branch');
   // ...
 }
 ```
@@ -64,9 +64,9 @@ if (someValue > threshold) {
 Log before and after data changes:
 
 ```javascript
-console.log('[DEBUG:transform:before] raw data', { data });
+console.log('[DEBUG-a4f2 transform:before] raw data', { data });
 const processed = transformData(data);
-console.log('[DEBUG:transform:after] processed data', { processed });
+console.log('[DEBUG-a4f2 transform:after] processed data', { processed });
 ```
 
 ### 4. Async Boundaries
@@ -74,12 +74,12 @@ console.log('[DEBUG:transform:after] processed data', { processed });
 Log async operations with timing:
 
 ```javascript
-console.log('[DEBUG:async:start] fetching user', { userId, time: Date.now() });
+console.log('[DEBUG-a4f2 async:start] fetching user', { userId, time: Date.now() });
 try {
   const user = await fetchUser(userId);
-  console.log('[DEBUG:async:success] user fetched', { user, time: Date.now() });
+  console.log('[DEBUG-a4f2 async:success] user fetched', { user, time: Date.now() });
 } catch (error) {
-  console.log('[DEBUG:async:error] fetch failed', { error: error.message, time: Date.now() });
+  console.log('[DEBUG-a4f2 async:error] fetch failed', { error: error.message, time: Date.now() });
 }
 ```
 
@@ -91,14 +91,14 @@ Use consistent prefixes for easy filtering:
 
 | Prefix | Purpose |
 |--------|---------|
-| `[DEBUG:entry]` | Function/method entry |
-| `[DEBUG:exit]` | Function/method exit |
-| `[DEBUG:decision]` | Conditional check |
-| `[DEBUG:branch]` | Branch taken |
-| `[DEBUG:transform]` | Data transformation |
-| `[DEBUG:async]` | Async operation |
-| `[DEBUG:error]` | Error caught |
-| `[DEBUG:state]` | State snapshot |
+| `[DEBUG-a4f2 entry]` | Function/method entry |
+| `[DEBUG-a4f2 exit]` | Function/method exit |
+| `[DEBUG-a4f2 decision]` | Conditional check |
+| `[DEBUG-a4f2 branch]` | Branch taken |
+| `[DEBUG-a4f2 transform]` | Data transformation |
+| `[DEBUG-a4f2 async]` | Async operation |
+| `[DEBUG-a4f2 error]` | Error caught |
+| `[DEBUG-a4f2 state]` | State snapshot |
 
 ### Required Information
 
@@ -112,7 +112,7 @@ Each log should include:
 ### Example Format
 
 ```javascript
-console.log('[DEBUG:checkpoint-name] description', {
+console.log('[DEBUG-a4f2 checkpoint-name] description', {
   function: 'functionName',
   timestamp: new Date().toISOString(),
   data: { /* relevant values */ }
@@ -124,28 +124,28 @@ console.log('[DEBUG:checkpoint-name] description', {
 ### JavaScript/TypeScript
 
 ```javascript
-console.log('[DEBUG:xxx]', JSON.stringify({ ... }, null, 2));
+console.log('[DEBUG-a4f2 checkpoint]', JSON.stringify({ ... }, null, 2));
 ```
 
 ### Python
 
 ```python
 import logging
-logging.debug(f'[DEBUG:xxx] {{"key": "{value}"}}')
+logging.debug(f'[DEBUG-a4f2 checkpoint] {{"key": "{value}"}}')
 # or
-print(f'[DEBUG:xxx]', {'key': value})
+print(f'[DEBUG-a4f2 checkpoint]', {'key': value})
 ```
 
 ### Go
 
 ```go
-log.Printf("[DEBUG:xxx] %+v\n", data)
+log.Printf("[DEBUG-a4f2 checkpoint] %+v\n", data)
 ```
 
 ### Rust
 
 ```rust
-println!("[DEBUG:xxx] {:?}", data);
+println!("[DEBUG-a4f2 checkpoint] {:?}", data);
 // or with tracing
 tracing::debug!(?data, "checkpoint description");
 ```
@@ -198,15 +198,15 @@ Keep a list of added logs:
 
 | File | Line | Log Prefix |
 |------|------|------------|
-| src/api.ts | 45 | `[DEBUG:entry]` |
-| src/api.ts | 52 | `[DEBUG:exit]` |
-| src/utils.ts | 23 | `[DEBUG:transform]` |
+| src/api.ts | 45 | `[DEBUG-a4f2 entry]` |
+| src/api.ts | 52 | `[DEBUG-a4f2 exit]` |
+| src/utils.ts | 23 | `[DEBUG-a4f2 transform]` |
 
 ### Removal Process
 
-1. Search for `[DEBUG:` pattern in modified files
+1. Search for `[DEBUG-` pattern in modified files
 2. Remove each log statement
-3. Verify no debug logs remain: `grep -r "\[DEBUG:" src/`
+3. Verify no debug logs remain: `rg "\[DEBUG-[a-z0-9]+" src/`
 
 ## Security Considerations
 
@@ -218,10 +218,10 @@ NEVER log sensitive data!
 
 ```javascript
 // BAD - logs password
-console.log('[DEBUG:auth]', { user, password });
+console.log('[DEBUG-a4f2 auth]', { user, password });
 
 // GOOD - sanitized
-console.log('[DEBUG:auth]', {
+console.log('[DEBUG-a4f2 auth]', {
   user,
   passwordProvided: !!password,
   passwordLength: password?.length
