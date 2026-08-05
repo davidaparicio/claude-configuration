@@ -1,180 +1,77 @@
 ---
 name: step-01-analyze
-description: Analyze the error in depth to understand root cause
+description: Build a tight feedback loop, minimize the reproduction, and identify the root cause
 prev_step: steps/step-00-init.md
 next_step: steps/step-02-find-solutions.md
 ---
 
-# Step 1: Analyze the Error
+# Step 1: Diagnose the Error
 
-## MANDATORY EXECUTION RULES (READ FIRST):
+Build the feedback loop before building a theory. Do not modify production behavior or propose fixes in this step.
 
-- 🛑 NEVER propose solutions in this step
-- ✅ ALWAYS gather complete error context before concluding
-- 📋 YOU ARE AN INVESTIGATOR, not a fixer
-- 💬 FOCUS on understanding the problem only
-- 🚫 FORBIDDEN to make code changes
+## 1. Read the system context
 
-## EXECUTION PROTOCOLS:
+Read the complete error and stack trace. Inspect `CONTEXT.md`, relevant ADRs, scoped repository instructions, recent commits, and the files named by the failure. Preserve exact error codes, paths, inputs, timings, and environment details.
 
-- 🎯 Show your analysis reasoning before conclusions
-- 💾 Document all findings in `{error_analysis}`
-- 📖 Complete investigation before loading next step
-- 🚫 FORBIDDEN to load step-02 until analysis is thorough
+## 2. Build a red-capable feedback loop
 
-## CONTEXT BOUNDARIES:
+Spend disproportionate effort here. Choose the narrowest mechanism that drives the real bug path:
 
-- Variables from step-00: `{error_context}`, `{auto_mode}`
-- Don't assume solutions exist yet
-- Focus purely on understanding what's wrong
+1. Failing unit, integration, or end-to-end test at the correct seam
+2. `curl` or HTTP script against the running service
+3. CLI invocation with fixture input and an asserted output
+4. Headless browser script asserting DOM, console, or network state
+5. Captured request, payload, event, or trace replay
+6. Throwaway harness around the smallest relevant subsystem
+7. Seeded property or fuzz loop for intermittent wrong output
+8. Automated bisection or old-versus-new differential loop
+9. Human-in-the-loop script based on `scripts/hitl-loop.template.sh`
 
-## YOUR TASK:
+Tighten the loop until it is:
 
-Investigate the error thoroughly to understand its root cause, affected files, and scope of impact.
+- **Red-capable:** it asserts the user's exact symptom, not merely "did not crash"
+- **Deterministic:** repeated runs return the same verdict; for flaky bugs, raise and pin the reproduction rate
+- **Fast:** seconds where practical
+- **Agent-runnable:** unattended except for a structured HITL script
 
----
+Record `{feedback_loop}` with the exact command, expected red signal, observed output, duration, and reproduction rate. Phase completion requires one command already run at least once. No red-capable command means no hypotheses.
 
-## EXECUTION SEQUENCE:
+### When no loop can be built
 
-### 1. Gather Error Information
+List every mechanism attempted and stop. Ask for access to the reproducing environment, a captured artifact such as a HAR/log/core dump/recording, or permission for temporary instrumentation. Do not compensate for a missing signal with speculation. Auto mode does not waive this gate.
 
-**Read the COMPLETE error message first** - don't skim!
-- Parse the exact error message and type
-- Identify file paths and line numbers from stack trace
-- Note any error codes, exit codes, or status
+## 3. Reproduce and minimize
 
-**If no specific error:**
-- Ask user to describe exact symptoms
-- Check `git status` and `git log --oneline -10` for recent changes
-- Look for obvious issues in mentioned files
+Run the loop until it shows the failure the user described. Then remove inputs, callers, configuration, data, and steps one at a time, re-running after each removal. The reproduction is minimal when removing any remaining element makes it go green.
 
-### 2. Reproduce the Error (CRITICAL)
+Capture the exact failing output or timing. A nearby failure is not evidence for the reported bug.
 
-<critical>
-If you cannot reproduce consistently, you cannot verify a fix. This is non-negotiable.
-</critical>
+## 4. Rank falsifiable hypotheses
 
-**Attempt reproduction:**
-- Run the exact command/action that triggers the error
-- Document the minimal steps to reproduce
-- Note any conditions (environment, data, timing)
+Generate 3-5 causes before testing any one. Use this format:
 
-**If cannot reproduce:**
-- **→ Trigger Log Technique**: Load `./step-01b-log-instrumentation.md`
-- Check for Heisenbug indicators (timing-sensitive, race condition)
-- Ask user for more context about when it occurs
+> If `<cause>` is responsible, changing or observing `<probe>` will produce `<prediction>`.
 
-<critical>
-When reproduction fails, the Log Technique is your best tool!
-Add strategic debug logs → User runs app → User shares output → Analyze
-</critical>
+Discard hypotheses without a concrete prediction. Present the ranked list briefly to the user, but continue with the best ranking when they are unavailable.
 
-### 3. Form Hypotheses (Ranked)
+## 5. Probe one variable at a time
 
-**List 3-5 possible causes in order of likelihood:**
+Prefer debugger or REPL inspection, then targeted logs at boundaries that distinguish hypotheses. Tag temporary logs with one run-specific prefix such as `[DEBUG-a4f2]` so cleanup is exhaustive. For performance regressions, establish a timing/profile/query-plan baseline and bisect; broad logging usually distorts the signal.
 
-| Rank | Hypothesis | Evidence | How to Test |
-|------|------------|----------|-------------|
-| Most Likely | *What you think is wrong* | *What supports this* | *How to verify/disprove* |
-| Likely | ... | ... | ... |
-| Possible | ... | ... | ... |
+Test each prediction against the feedback loop. Record confirmed and rejected hypotheses with their evidence.
 
-**Test hypotheses systematically** - don't jump to the first idea!
+## 6. Complete the diagnosis
 
-### 4. Investigate the Codebase
+Populate `{error_analysis}`:
 
-**Search for relevant code:**
-- Use Grep to find related patterns
-- Read files mentioned in error COMPLETELY
-- Check imports and dependencies
-- Look for similar patterns that work elsewhere
+| Field | Required evidence |
+|---|---|
+| Exact symptom | User-visible error, wrong output, or timing |
+| Feedback command | The command from `{feedback_loop}` |
+| Minimal reproduction | Every remaining element is load-bearing |
+| Root cause | Confirmed hypothesis and probe evidence |
+| Affected files | Concrete paths |
+| Correct test seam | Existing seam, proposed seam, or explicitly unavailable |
+| Verification method | Original un-minimized runtime path |
 
-**Build context:**
-- What function/component is failing?
-- What data flows through this code?
-- Check git blame: who changed this recently and why?
-
-### 5. Identify Root Cause
-
-**Validate against hypotheses:**
-- Which hypothesis is confirmed/rejected by evidence?
-- What is the immediate cause vs. deeper underlying issue?
-- Are there related problems?
-
-**Document your analysis with:**
-
-| Field | Value |
-|-------|-------|
-| Error Type | *Type of error* |
-| Error Message | *Exact error message* |
-| Reproducible? | Yes / No |
-| Reproduction Steps | *Minimal steps to trigger* |
-| Root Cause | *What's actually causing this* |
-| Affected Files | *List of files involved* |
-| Scope | Localized / Widespread |
-| Complexity | Simple / Moderate / Complex |
-| Verification Method | *How to verify the fix works* |
-
-**Hypotheses tested:**
-
-| Hypothesis | Result |
-|------------|--------|
-| *What you thought* | Confirmed / Rejected |
-| ... | ... |
-
-### 6. Ask for Additional Context
-
-**If `{auto_mode}` = true:**
-→ Proceed to step-02 automatically
-
-**If `{auto_mode}` = false:**
-
-Present analysis summary, then use **AskUserQuestion** with:
-- **Header:** "Context"
-- **Question:** "Do you have additional information that could help with the analysis?"
-- **Options:**
-  1. "No, continue (Recommended)" → Analysis is sufficient, proceed to find solutions
-  2. "Yes, I have more info" → Let me provide additional context
-
-**Handle responses:**
-- **"No, continue":** Load step-02
-- **"Yes, I have more info":** Wait for user input, update `{error_analysis}`, then proceed to step-02
-
-**If reproduction was impossible:**
-→ Offer to use Log Technique (step-01b) before proceeding
-
----
-
-## SUCCESS METRICS:
-
-✅ Error reproduced (or documented why it can't be)
-✅ 3+ hypotheses formed and tested systematically
-✅ Root cause clearly identified with evidence
-✅ Affected files documented
-✅ Verification method identified for later
-✅ `{error_analysis}` state variable populated
-
-## FAILURE MODES:
-
-❌ Jumping to solutions without thorough analysis
-❌ Skipping reproduction attempt
-❌ Testing only one hypothesis (tunnel vision)
-❌ Missing key files or dependencies in investigation
-❌ **CRITICAL**: Making code changes in this step
-
-## ANALYSIS PROTOCOLS:
-
-- Read actual error messages, don't assume
-- Check git history for recent changes that might have caused this
-- Look at test files to understand expected behavior
-- Don't skip investigating even if solution seems obvious
-
----
-
-## NEXT STEP:
-
-After analysis confirmed, load `./step-02-find-solutions.md`
-
-<critical>
-Remember: This step is ONLY about analysis - don't fix or propose solutions yet!
-</critical>
+Proceed to `step-02-find-solutions.md` only when the loop is red-capable and the root cause is supported by evidence.

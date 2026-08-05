@@ -1,6 +1,6 @@
 interface:
   display_name: "Grill Me"
-  short_description: "Sharpen a plan through interview"
+  short_description: "Stress-test ideas in rapid 10-question rounds"
   icon_small: "./assets/codex-icon.svg"
   icon_large: "./assets/codex-icon.svg"
   brand_color: "#F5F5F5"

@@ -11,7 +11,7 @@ reference: references/log-technique.md
 ## MANDATORY EXECUTION RULES (READ FIRST):
 
 - 🛑 NEVER propose solutions in this step
-- ✅ ALWAYS add logs with proper prefixes `[DEBUG:xxx]`
+- ✅ ALWAYS add logs with one run-specific prefix such as `[DEBUG-a4f2]`
 - 📋 YOU ARE AN INSTRUMENTER, adding visibility to the code
 - 💬 FOCUS on gathering runtime information only
 - 🚫 FORBIDDEN to fix the bug or change logic
@@ -67,44 +67,36 @@ Based on `{error_analysis}`, identify where to add logs:
 Use the [Log Technique Reference](../references/log-technique.md) for proper formatting!
 </critical>
 
-**Log Prefix Convention:**
-- `[DEBUG:entry]` - Function entry
-- `[DEBUG:exit]` - Function exit
-- `[DEBUG:decision]` - Conditional checks
-- `[DEBUG:branch]` - Branch taken
-- `[DEBUG:transform]` - Data changes
-- `[DEBUG:async]` - Async operations
-- `[DEBUG:state]` - State snapshots
-- `[DEBUG:error]` - Caught errors
+**Log Prefix Convention:** generate one unique prefix for the run, such as `[DEBUG-a4f2]`, and use it on every temporary log. Put the location after it, for example `[DEBUG-a4f2 entry]` or `[DEBUG-a4f2 decision]`. One prefix makes cleanup a single exhaustive search.
 
 **For each log added, track it:**
 
 | # | File | Line | Prefix | Purpose |
 |---|------|------|--------|---------|
-| 1 | {path} | {line} | `[DEBUG:entry]` | *What you're checking* |
-| 2 | {path} | {line} | `[DEBUG:decision]` | *What condition* |
+| 1 | {path} | {line} | `[DEBUG-a4f2 entry]` | *What you're checking* |
+| 2 | {path} | {line} | `[DEBUG-a4f2 decision]` | *What condition* |
 | 3 | ... | ... | ... | ... |
 
 **Example Implementation:**
 
 ```javascript
 // At function entry
-console.log('[DEBUG:entry] processOrder', {
+console.log('[DEBUG-a4f2 entry] processOrder', {
   timestamp: new Date().toISOString(),
   orderId: order.id,
   itemCount: order.items.length
 });
 
 // At decision point
-console.log('[DEBUG:decision] validateOrder', {
+console.log('[DEBUG-a4f2 decision] validateOrder', {
   isValid: order.items.length > 0,
   hasPayment: !!order.paymentMethod
 });
 
 // At async boundary
-console.log('[DEBUG:async:start] fetchInventory', { time: Date.now() });
+console.log('[DEBUG-a4f2 async:start] fetchInventory', { time: Date.now() });
 const inventory = await fetchInventory(order.items);
-console.log('[DEBUG:async:end] fetchInventory', {
+console.log('[DEBUG-a4f2 async:end] fetchInventory', {
   time: Date.now(),
   found: inventory.length
 });
@@ -126,10 +118,10 @@ Before asking user to run, verify NO sensitive data is logged!
 **If sensitive data needed, sanitize:**
 ```javascript
 // BAD
-console.log('[DEBUG]', { password });
+console.log('[DEBUG-a4f2]', { password });
 
 // GOOD
-console.log('[DEBUG]', {
+console.log('[DEBUG-a4f2]', {
   passwordProvided: !!password,
   passwordLength: password?.length
 });
@@ -137,9 +129,7 @@ console.log('[DEBUG]', {
 
 ### 4. Ask User to Run and Share Logs
 
-**If `{auto_mode}` = true:**
-→ Skip this step entirely - cannot use log technique in auto mode
-→ Proceed to step-02 with best available analysis
+**If `{auto_mode}` = true:** run the instrumented path yourself when the environment is available. If only the user can reproduce it, stop with the exact run instructions and required artifact; auto mode does not permit diagnosis without a feedback signal.
 
 **If `{auto_mode}` = false:**
 
@@ -162,14 +152,14 @@ questions:
 **Handle responses:**
 - **"I'll run it now":** Wait for user to paste logs, then proceed to Analysis
 - **"Logs aren't in right place":** Ask where they think the issue is, add logs there
-- **"Can't run it now":** Proceed to step-02 with current analysis
+- **"Can't run it now":** Stop with the exact command to run and the artifact or access still required. Do not enter the solutions phase until `{feedback_loop}` contains an already-run command that catches the exact symptom.
 
 ### 5. Analyze Returned Logs
 
 When user shares logs:
 
 **Parse the output:**
-1. Look for all `[DEBUG:xxx]` lines
+1. Look for all `[DEBUG-a4f2 checkpoint]` lines
 2. Check execution order (timestamps if present)
 3. Identify unexpected values or missing logs
 4. Note which branches were taken
@@ -178,9 +168,9 @@ When user shares logs:
 
 | Log | Expected | Actual | Insight |
 |-----|----------|--------|---------|
-| `[DEBUG:entry] func` | Called once | Called 3x | *Unexpected multiple calls* |
-| `[DEBUG:decision] check` | `true` | `false` | *Condition failing* |
-| `[DEBUG:async:end]` | Present | Missing | *Promise never resolved* |
+| `[DEBUG-a4f2 entry] func` | Called once | Called 3x | *Unexpected multiple calls* |
+| `[DEBUG-a4f2 decision] check` | `true` | `false` | *Condition failing* |
+| `[DEBUG-a4f2 async:end]` | Present | Missing | *Promise never resolved* |
 
 **Update `{error_analysis}` with findings:**
 - What the logs revealed
@@ -218,13 +208,13 @@ questions:
 debug_logs:
   - file: "src/api.ts"
     line: 45
-    prefix: "[DEBUG:entry]"
+    prefix: "[DEBUG-a4f2 entry]"
   - file: "src/api.ts"
     line: 52
-    prefix: "[DEBUG:exit]"
+    prefix: "[DEBUG-a4f2 exit]"
   - file: "src/utils.ts"
     line: 23
-    prefix: "[DEBUG:transform]"
+    prefix: "[DEBUG-a4f2 transform]"
 ```
 
 <critical>
@@ -241,23 +231,25 @@ These logs MUST be removed in step-04-fix or step-05-verify!
 ✅ User ran app and shared log output
 ✅ Log output analyzed for insights
 ✅ `{error_analysis}` updated with findings
-✅ Root cause clearer than before
+✅ `{feedback_loop}` contains an already-run, red-capable command and captured output
+✅ Root cause is supported by probe evidence
 
 ## FAILURE MODES:
 
 ❌ Adding logs without a clear strategy
 ❌ Logging sensitive data (passwords, tokens, PII)
 ❌ Not tracking logs for later removal
-❌ Proceeding without user log output (unless auto mode)
+❌ Proceeding without captured feedback-loop output, including in auto mode
 ❌ **CRITICAL**: Making code fixes in this step
 ❌ **CRITICAL**: Not asking user to run and share logs
 
 ## STATE UPDATES:
 
 After this step, ensure:
-- `{error_analysis}` includes log findings
-- `{debug_logs}` lists all added logs for cleanup
-- Decision recorded on whether to iterate or proceed
+- `{error_analysis}` includes log findings and evidence for the confirmed cause
+- `{feedback_loop}` names the already-run command, exact red signal, duration, and reproduction rate
+- `{debug_logs}` lists the one run-specific prefix and every added location for cleanup
+- Proceed only when the feedback loop gate is satisfied; otherwise remain blocked on the named artifact or access
 
 ---
 

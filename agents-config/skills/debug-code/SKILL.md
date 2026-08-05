@@ -1,11 +1,11 @@
 ---
 name: debug-code
-description: Systematic error debugging with analysis, solution discovery, and verification
+description: Debug errors and performance regressions with a tight red-capable feedback loop, ranked falsifiable hypotheses, focused fixes, regression tests, and real runtime verification.
 argument-hint: "[error description or context] [-a for auto mode]"
 ---
 
 <objective>
-Debug errors systematically through a 5-step workflow: analyze the error, find potential solutions, propose options to the user, implement the fix, and verify it works through multi-layer verification.
+Debug errors through six stages: initialize, build and minimize a red-capable feedback loop, compare fixes, select one, implement it with a regression test, and verify the original runtime path.
 </objective>
 
 <quick_start>
@@ -20,8 +20,8 @@ Debug errors systematically through a 5-step workflow: analyze the error, find p
 ```
 
 **What it does:**
-1. **Analyze**: Reproduce error, identify root cause → **ask if you have more context**
-2. **Log Technique** (if needed): Add debug logs → **user runs & shares output** → analyze
+1. **Analyze**: Build a tight red-capable command, minimize the repro, then test ranked hypotheses
+2. **Instrumentation** (if needed): Add uniquely tagged probes and collect runtime evidence
 3. **Find Solutions**: Research 2-3+ potential fixes with pros/cons
 4. **Propose**: Present options → **you choose which solution**
 5. **Fix**: Implement solution with strategic logging
@@ -36,9 +36,10 @@ Debug errors systematically through a 5-step workflow: analyze the error, find p
 <core_principles>
 **Battle-Tested Principles:**
 
-1. **Reproduce Before Anything Else** - If you can't reproduce it, you can't verify the fix
-2. **Hypothesis-Driven Analysis** - List 3-5 causes ranked by likelihood, test systematically
-3. **Multi-Layer Verification** - Tests alone give false confidence (20-40% still fail in production)
+1. **Build the feedback loop first** - Name one fast command that can go red on the user's exact symptom
+2. **Minimize before theorizing** - Remove every input and dependency that is not load-bearing
+3. **Hypothesis-driven analysis** - Rank 3-5 falsifiable causes and test one variable at a time
+4. **Multi-layer verification** - Re-run the original repro and actual runtime path; green tests alone are insufficient
 </core_principles>
 
 <verification_pyramid>
@@ -82,6 +83,7 @@ Debug errors systematically through a 5-step workflow: analyze the error, find p
 | `{error_context}` | string | User's description of the error |
 | `{auto_mode}` | boolean | Skip confirmations, use recommended options |
 | `{error_analysis}` | object | Detailed analysis from step 1 |
+| `{feedback_loop}` | object | Exact red-capable command, expected signal, timing, and determinism |
 | `{debug_logs}` | list | Debug logs added for cleanup (file, line, prefix) |
 | `{solutions}` | list | Potential solutions found in step 2 |
 | `{selected_solution}` | object | User's chosen solution from step 3 |
@@ -113,6 +115,8 @@ Load `steps/step-00-init.md`
 
 <success_criteria>
 - Error successfully reproduced
+- One fast, deterministic, agent-runnable command catches the user's exact symptom
+- Reproduction minimized so every remaining element is load-bearing
 - Root cause identified through hypothesis testing
 - 2-3+ potential solutions researched with pros/cons
 - Solution selected (by user or auto mode)
@@ -123,4 +127,5 @@ Load `steps/step-00-init.md`
 - **Runtime execution verified** (actual code path executed)
 - User confirms fix resolves the original issue
 - No regressions introduced
+- Temporary instrumentation removed and the confirmed cause recorded
 </success_criteria>

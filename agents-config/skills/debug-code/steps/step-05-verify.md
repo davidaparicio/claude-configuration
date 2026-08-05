@@ -106,19 +106,19 @@ python -m py_compile {file}   # Python
 
 | Check | Command | What It Catches | Reliability |
 |-------|---------|-----------------|-------------|
-| **Build** | `npm run build` | Compilation, bundling | 95% |
-| **Types** | `tsc --noEmit` / `npx tsc` | Type errors, null safety | 90% |
-| **Lint** | `npm run lint` | Code patterns, potential bugs | 80% |
-| **Tests** | `npm test -- --testPathPattern={pattern}` | Regression in tested paths | 70%* |
+| **Build** | `pnpm build` | Compilation, bundling | 95% |
+| **Types** | `pnpm typecheck` / `pnpm exec tsc --noEmit` | Type errors, null safety | 90% |
+| **Lint** | `pnpm lint` | Code patterns, potential bugs | 80% |
+| **Tests** | `pnpm test -- --testPathPattern={pattern}` | Regression in tested paths | 70%* |
 
 *Tests only catch what they test for - same blind spots apply
 
 **Execute:**
 ```bash
-npm run build
-npm run typecheck  # or: npx tsc --noEmit
-npm run lint
-npm test -- --testPathPattern="{related-test-file}"
+pnpm build
+pnpm typecheck  # or: pnpm exec tsc --noEmit
+pnpm lint
+pnpm test -- --testPathPattern="{related-test-file}"
 ```
 
 **Document Layer 2 results:**
@@ -155,7 +155,7 @@ This is the most important layer. Tests can pass while real execution fails.
 
 **Frontend Verification:**
 ```bash
-npm run dev
+pnpm dev
 # Open in Chrome, check DevTools Console for:
 # - No new errors
 # - Network requests succeed
@@ -196,9 +196,9 @@ curl -X POST http://localhost:3000/api/{endpoint} \
 
 **Check for regressions:**
 ```bash
-npm test
+pnpm test
 # Or run full CI check
-npm run ci  # if available
+pnpm ci  # if available
 ```
 
 **Document:**
@@ -210,6 +210,9 @@ npm run ci  # if available
 | Details | *If any* |
 
 **If all layers passed:**
+→ Search for the run-specific `[DEBUG-...]` prefix and remove every temporary log
+→ State the confirmed hypothesis in the final report and commit/PR message
+→ Ask what would have prevented the bug; when the answer is architectural (missing seam, tangled callers, hidden coupling), recommend `improve-codebase-architecture` with the concrete evidence
 → Report success, workflow complete
 
 **If any layer fails:**

@@ -1,5 +1,45 @@
 # Claude Code Config Changelog
 
+## [2026-08-04] - Canonical workflow skill sync
+
+### Updated Skills
+- `skills/apex/` - Replace the legacy template-heavy flow with the adaptive APEX workflow, deterministic run state, resumable checkpoints, risk-based validation, and proof-backed completion
+- `skills/verify/` - Add proof manifests, evidence analysis, small-run delivery, and the self-contained HTML report generator
+- `skills/grill-me/` - Use rapid 10-question interview rounds with recommended answers and a final decision brief
+- `skills/oneshot/` - Add OpenCode invocation metadata while retaining the focused implementation workflow
+- `skills/use-delegate/` - Refresh delegation routing and add OpenCode invocation metadata
+
+### Codex Packaging
+- Refreshed current `agents/openai.yaml` metadata for the Git, CI, review, grammar, and implementation workflow skills mirrored from the canonical local catalog
+
+### Safety and Portability
+- Refuse destructive worktree cleanup when uncommitted changes exist and preserve unmerged branches
+- Replace machine-specific `/Users/melvynx` skill paths with portable home-relative paths
+- Replace destructive dependency cleanup guidance with lockfile-preserving `npm ci`
+- Remove invalid empty skill and `.DS_Store` packaging entries
+
+## [2026-07-26] - Premium skill catalog and pentest workflow sync
+
+### New Skills
+- `skills/app-icon/` - Generate and prepare mobile app icons for Expo and React Native
+- `skills/appstore-connect/` - Manage apps, builds, TestFlight, metadata, signing, and submissions
+- `skills/hooks-manager/` - Configure lifecycle hooks for Claude Code, Codex, and Cursor
+- `skills/prompt/` - Create minimalist SVG logo directions and variations
+- `skills/tools/` - Reference the recommended AIBlueprint tools and libraries
+- `skills/use-delegate/` - Delegate heavy execution while the host agent plans and reviews
+- `skills/use-goal/` - Create persistent, evidence-based Claude Code and Codex goals
+
+### Updated Skills
+- `skills/debug-code/` - Add the latest red-capable feedback loop, log instrumentation, and runtime verification workflow
+- `skills/environments-manager/` - Refresh per-worktree environment setup and scripts
+- `skills/review-code/` - Add the current review workflow and Fowler smell baseline
+- `skills/skill-manager/` - Refresh cross-platform skill authoring guidance and vocabulary
+- `skills/use-artifacts/` - Add the portable local runtime and current artifact workflow
+- `skills/web-pentest/` - Add numbered engagement workspaces, AgentMail-backed auth testing, durable artifacts, and effective entitlement verification
+
+### Bundle Coherence
+- Premium now contains every skill shipped by the free CLI while retaining its Premium-only workflows
+
 ## [2026-07-18 10:15:11] - Premium skills refresh
 
 ### New Skills
