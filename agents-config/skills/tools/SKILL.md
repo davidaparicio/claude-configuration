@@ -1,149 +1,102 @@
 ---
 name: tools
-description: Reference document listing all recommended tools and libraries for AIBlueprint development
+description: Use when choosing libraries, services, CLIs, or architecture for a NowStack SaaS project; follow the canonical TanStack Start and Convex stack and avoid incompatible database or framework additions.
 ---
 
-# AIBlueprint Tools & Libraries Reference
+# NowStack Tools & Libraries
 
-This document lists all recommended tools and libraries for development with the AIBlueprint stack. Use this as a reference when making architecture decisions.
+Use the tools already shipped by NowStack. Read the project's `package.json`
+before choosing versions or adding dependencies; it is the version source of
+truth.
 
-## Quick Reference Table
+## Canonical Stack
 
-| Name | Description | Tags |
-|------|-------------|------|
-| [Next.js](https://nextjs.org/) | Main React framework with App Router | `framework`, `frontend`, `backend` |
-| [TanStack Query](https://tanstack.com/query) | Data fetching & caching for API routes | `frontend`, `library` |
-| [Zustand](https://zustand.docs.pmnd.rs/) | Client-side state management | `frontend`, `library` |
-| [nuqs](https://nuqs.47ng.com/) | URL state management | `frontend`, `library` |
-| [shadcn/ui](https://ui.shadcn.com/) | Customizable React components | `frontend`, `library` |
-| [Convex](https://www.convex.dev/) | Realtime database & backend | `backend`, `database`, `realtime` |
-| [Liveblocks](https://liveblocks.io/) | Multiplayer collaboration features | `frontend`, `backend`, `realtime` |
-| [Neon](https://neon.tech/) | Serverless PostgreSQL | `backend`, `database`, `sql` |
-| [Supabase](https://supabase.com/) | PostgreSQL + Backend as a Service | `backend`, `database`, `sql` |
-| [Prisma](https://prisma.io/) | Type-safe ORM (recommended for teams) | `backend`, `database`, `orm` |
-| [Drizzle ORM](https://orm.drizzle.team/) | Lightweight type-safe ORM | `backend`, `database`, `orm` |
-| [Better Auth](https://www.better-auth.com/) | Complete authentication solution | `backend`, `library` |
-| [Inngest](https://www.inngest.com/) | Background jobs & workflows | `backend`, `service` |
-| [Next Safe Action](https://next-safe-action.dev/) | Secure Server Actions | `backend`, `library` |
-| [next-zod-route](https://github.com/Melvynx/next-zod-route) | Secure API Routes | `backend`, `library` |
-| [Zod](https://zod.dev/) | Runtime validation (v4) | `library`, `validation` |
-| [AI SDK](https://ai-sdk.dev/) | LLM integration wrapper | `backend`, `frontend`, `library` |
-| [up-fetch](https://github.com/L-Blondy/up-fetch) | Modern fetch wrapper | `backend`, `frontend`, `library` |
-| [Vitest](https://vitest.dev/) | Fast unit testing | `testing`, `library` |
-| [Playwright](https://playwright.dev/) | E2E testing | `testing`, `library` |
-| [Sentry](https://sentry.io/) | Error tracking & monitoring | `monitoring`, `service` |
-| [Resend](https://resend.com/) | Developer email service | `email`, `service` |
-| [React Email](https://react.email/) | Email templates in React | `email`, `library` |
-| [AWS SES](https://aws.amazon.com/ses/) | High-volume email | `email`, `service` |
-| [Stripe](https://stripe.com/) | Complete payment solution | `payment`, `service` |
-| [Lemon Squeezy](https://lemonsqueezy.com/) | Payments with tax handling | `payment`, `service` |
-| [PostHog](https://posthog.com/) | Product analytics | `analytics`, `service` |
-| [Plausible](https://plausible.io/) | Simple web analytics | `analytics`, `service` |
-| [React Hook Form](https://react-hook-form.com/) | Form management (recommended) | `frontend`, `library`, `forms` |
-| [TanStack Form](https://tanstack.com/form) | Headless form management | `frontend`, `library`, `forms` |
-| [Uploadthing](https://uploadthing.com/) | Simple file uploads | `upload`, `images`, `service` |
-| [Cloudflare R2](https://developers.cloudflare.com/r2/) | S3-compatible storage | `backend`, `images`, `storage` |
-| [AWS S3](https://aws.amazon.com/s3/) | Object storage standard | `storage`, `images`, `infra` |
+| Area | Tool | Use |
+| --- | --- | --- |
+| Application framework | [TanStack Start](https://tanstack.com/start) + [Vite](https://vite.dev/) | Full-stack React application and build tooling |
+| UI | [React](https://react.dev/) | Components and rendering |
+| Routing | [TanStack Router](https://tanstack.com/router) | Routes, loaders, guards, and typed search parameters |
+| Backend and database | [Convex](https://www.convex.dev/) | Only application backend, database, realtime subscriptions, actions, and scheduled work |
+| Authentication | [Better Auth](https://www.better-auth.com/) + [`@convex-dev/better-auth`](https://www.npmjs.com/package/@convex-dev/better-auth) | Authentication, OAuth, API keys, users, and organizations backed by Convex |
+| Styling | [Tailwind CSS](https://tailwindcss.com/) v4 | Styling and design tokens |
+| Components | [shadcn/ui](https://ui.shadcn.com/) + [Base UI](https://base-ui.com/) | Accessible application components |
+| Forms | [TanStack Form](https://tanstack.com/form) + [Zod](https://zod.dev/) v4 | Form state and validation |
+| Server data | Convex React hooks | Realtime queries, mutations, actions, and optimistic updates |
+| Client async state | [TanStack Query](https://tanstack.com/query) | Non-Convex asynchronous operations and imperative lifecycle state |
+| Global UI state | [Zustand](https://zustand.docs.pmnd.rs/) | Shared client-only UI state |
+| URL state | TanStack Router search parameters; [`nuqs`](https://nuqs.47ng.com/) where already integrated | Shareable, navigable state |
+| Tables and charts | [TanStack Table](https://tanstack.com/table) + [Recharts](https://recharts.org/) | Data-heavy interfaces and charts |
+| Animation | [Motion](https://motion.dev/) | Product motion and transitions |
 
-## Categories
+## Product Services
 
-### Framework & Frontend
-- **Next.js** - Main framework
-- **TanStack Query** - Data fetching & cache
-- **Zustand** - Client state management
-- **nuqs** - URL state
-- **shadcn/ui** - UI components
+| Need | Canonical tool | Notes |
+| --- | --- | --- |
+| Payments | [Stripe](https://stripe.com/) | Checkout, subscriptions, portal, and webhooks run through Convex actions and HTTP routes |
+| Transactional email | [Resend](https://resend.com/) + [React Email](https://react.email/) | Templates and delivery through the Convex Resend component |
+| File storage | [Cloudflare R2](https://developers.cloudflare.com/r2/) + AWS S3 SDK | S3-compatible uploads; do not introduce a second file backend |
+| Product analytics | [PostHog](https://posthog.com/) | Optional; enable only when the product requires analytics |
+| Deployment | [Vercel](https://vercel.com/) + Convex | Deploy the TanStack app and its Convex backend explicitly |
 
-### Backend & API
-- **Next Safe Action** - Secure Server Actions
-- **next-zod-route** - Secure API Routes
-- **Better Auth** - Authentication
-- **AI SDK** - LLM integration
-- **up-fetch** - HTTP client
+## Quality Tooling
 
-### Database & ORM
-- **Neon** - Serverless PostgreSQL (recommended)
-- **Supabase** - PostgreSQL + BaaS
-- **Prisma** - Type-safe ORM (recommended for teams)
-- **Drizzle ORM** - Lightweight ORM (recommended for performance)
+| Area | Tool |
+| --- | --- |
+| Unit and integration tests | Vitest, Testing Library, `happy-dom`, `convex-test` |
+| End-to-end tests | Playwright |
+| Type checking | TypeScript |
+| Linting | ESLint |
+| Formatting | Prettier + Tailwind CSS plugin |
+| Unused-code checks | Knip |
+| Browser verification | `dev-browser` |
 
-### Realtime & Collaboration
-- **Convex** - Realtime database + backend (recommended for realtime apps)
-- **Liveblocks** - Multiplayer collaboration (cursors, presence, comments)
+Run repository scripts instead of inventing alternatives: `pnpm ts`,
+`pnpm lint:ci`, `pnpm test:ci`, `pnpm test:e2e:ci`, `pnpm build`, and
+`pnpm skills:metadata:check` when skill metadata changes.
 
-### Validation & Forms
-- **Zod** - Data validation (v4)
-- **React Hook Form** - Form management (recommended)
-- **TanStack Form** - Modern alternative
+## Local Toolchain
 
-### Testing
-- **Vitest** - Unit tests
-- **Playwright** - E2E tests
+- Node and the exact pnpm version declared in `package.json`;
+- Git and GitHub CLI for repository workflows;
+- Convex through the project-local `pnpm exec convex` binary;
+- Vercel CLI and Stripe CLI when those integrations are enabled;
+- Cloudflare/Wrangler tooling only for R2 or Cloudflare operations;
+- `dev-browser` with a connectable Chrome for browser proof.
 
-### Monitoring & Analytics
-- **Sentry** - Error tracking & performance
-- **PostHog** - Product analytics (recommended)
-- **Plausible** - Simple web analytics
+Use `$ns-setup-tools` to diagnose machine prerequisites and
+`$ns-setup-accounts` for service authentication. Specialized configuration
+belongs to the matching `$ns-setup-*` skill.
 
-### Payments
-- **Stripe** - Complete solution (recommended for flexibility)
-- **Lemon Squeezy** - Simple + handles taxes (recommended for solopreneurs)
+## Architecture Rules
 
-### Email
-- **Resend** - Transactional emails (recommended)
-- **React Email** - Email templates in React
-- **AWS SES** - High volume
-
-### Images & Upload
-- **Uploadthing** - Simple Next.js uploads (recommended)
-- **Cloudflare R2** - Cheap object storage
-- **AWS S3** - Standard object storage
-
-### Services & Infrastructure
-- **Inngest** - Async jobs & workflows
-- **Cloudflare Browser Rendering** - Serverless scraping
-
-## Recommended Stack
-
-### Frontend
-- Next.js + TanStack Query + Zustand + shadcn/ui
-- React Hook Form + Zod
-
-### Backend
-- Neon (DB) + Prisma or Drizzle (ORM)
-- Next Safe Action + Better Auth
-- Resend + React Email
-
-### Services
-- Stripe (payments)
-- Uploadthing (upload)
-- Cloudflare R2 (storage)
-- PostHog (analytics)
-- Sentry (monitoring)
-
-### Testing
-- Vitest + Playwright
+- NowStack is **TanStack Start + Convex**, not Next.js.
+- Convex is the only application backend and database. Do not add Prisma,
+  Drizzle, PostgreSQL, Neon, Supabase, Redis, or database mirroring.
+- Use Convex React hooks for Convex data. Do not wrap subscriptions in TanStack
+  Query or call Convex through raw `fetch` from React components.
+- Use TanStack Router for routing and typed search parameters.
+- Use TanStack Form with Zod v4 for new forms.
+- Keep backend secrets in Convex environment variables. Keep only browser and
+  application configuration in local or Vercel environment files.
+- Fresh development setup uses local Convex by default. Preserve an existing
+  cloud development deployment unless the user explicitly changes it.
+- Add a dependency only when the existing stack cannot meet the requirement;
+  explain the gap before introducing another framework or service.
 
 ## Decision Guide
 
-| Decision | Recommendation |
-|----------|----------------|
-| Database | Neon + Prisma to start, Drizzle for performance |
-| Realtime | Convex for full realtime, Liveblocks for collaboration only |
-| Email | Resend to start, AWS SES for >100k/month |
-| Payments | Stripe for flexibility, Lemon Squeezy for tax simplicity |
-| Analytics | PostHog for product analytics, Plausible for simple web analytics |
-| Forms | React Hook Form (standard), TanStack Form (more control) |
-| ORM | Prisma (better DX), Drizzle (better perf, 2-3x faster) |
-| Upload | Uploadthing (simple), R2/S3 (more control) |
-| Testing | Vitest (unit), Playwright (E2E, more reliable than Cypress) |
-
-## Important Notes
-
-- **Zod**: Now v4, specify version to AI
-- **Supabase Auth**: Prefer Better-Auth for flexibility
-- **Convex vs Neon+Liveblocks**: Convex if entire app is realtime, Neon+Liveblocks if only some features need collaboration
-- **AWS S3**: Watch egress costs, prefer R2 for serving assets
-- **Stripe Tax**: Enable for automatic tax handling
-- **Sentry**: Configure source maps for real stack traces
-- **Prisma vs Drizzle**: Prisma = better DX, Drizzle = better perf
+| Decision | Choose |
+| --- | --- |
+| Persistent or realtime data | Convex query, mutation, or action |
+| Background or scheduled work | Convex actions and scheduler |
+| Authentication or organizations | Better Auth through Convex |
+| Form state | TanStack Form |
+| Validation | Zod v4 |
+| Shared client-only state | Zustand |
+| URL-visible state | TanStack Router search parameters |
+| Non-Convex async lifecycle | TanStack Query |
+| Payments | Stripe through Convex |
+| Email | Resend + React Email through Convex |
+| Uploads | Cloudflare R2 through the AWS S3-compatible SDK |
+| Unit tests | Vitest + Testing Library |
+| Browser journeys | Playwright and `dev-browser` |
