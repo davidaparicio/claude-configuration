@@ -1,44 +1,23 @@
 ---
 name: oneshot
-description: Implement one focused code change quickly with minimal exploration and targeted validation. Use for small bug fixes, single feature edits, config updates, or explicit "$oneshot" requests.
+description: Run the complete Melvyn workflow from analysis through runtime proof. Use when the user invokes $oneshot with a request.
 disable-model-invocation: true
-metadata:
-  opencode/autoinvoke: "false"
-  opencode/slash: "true"
-argument-hint: <feature-description>
+argument-hint: "[-a|auto] <request>"
 ---
 
-# OneShot
+Run these skills in order, passing each result to the next:
 
-Use this for one narrow implementation task. Optimize for the shortest reliable path to a working, verified change.
+1. `$analyze`
+2. `$plan`
+3. `$implement`
+4. `$review`
+5. `$verify`
+6. Close the GitHub issue `$plan` created
 
-## Workflow
+Do not skip, combine, or reorder stages. The GitHub issue created by `$plan` is the source of truth.
 
-### 1. Scope
+If the invocation contains `-a` or `auto`, do not pause for confirmation. Resolve facts, make reasonable reversible decisions, and record assumptions on the issue. Fix review or verification failures, then rerun every affected downstream stage.
 
-- Identify the exact target and likely files with `rg` / `rg --files`.
-- Read only the files needed to edit safely, usually 2-5 plus nearby examples.
-- Look up docs only when API, version, or current behavior may be stale.
+Close the issue only after `$verify` reports PASS for every acceptance criterion. Preserve `$verify`'s evidence in the final response: when verification captures screenshots, show every screenshot directly rather than replacing them with paths, links, or a summary. Comment with the outcome and the commit SHA when one exists, follow the repository's GitHub attribution rules, then close it and read the issue back as `CLOSED`. Leave it open when verification is `BLOCKED — NOT PROVEN` or the issue was not created in this run.
 
-### 2. Implement
-
-- Edit as soon as the existing pattern is clear.
-- Keep the diff minimal and local to the request.
-- Do not refactor, rename, redesign, rewrite docs, or clean adjacent code unless required.
-- Prefer existing helpers, conventions, and package scripts.
-
-### 3. Validate
-
-- Run the smallest meaningful checks: targeted tests, touched-package lint/typecheck, and formatter when expected.
-- If a check fails, fix only failures caused by this change and rerun.
-- Run broader checks only for shared/high-risk code or when the user asks.
-
-## Stop Rules
-
-- Do not expand into adjacent improvements.
-- Ask only when a missing decision blocks safe implementation.
-- If blocked after two concrete attempts, report the blocker, evidence, and the next exact option.
-
-## Final Response
-
-Report changed files, validation commands/results, and any skipped checks with reason.
+Without autonomous mode, pause only for a material decision or authorization. In either mode, stop only after verification passes and the issue is closed, or progress requires unavailable access, credentials, external authorization, or an irreversible decision that cannot be inferred safely.
