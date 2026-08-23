@@ -1,5 +1,29 @@
 # Claude Code Config Changelog
 
+## [2026-08-23] - Manual audit utilities
+
+### New Misc Skills
+- `skills/audit-memories/` - Explicit-only audit and cleanup of agent-facing project documentation
+- `skills/audit-skills/` - Explicit-only audit of skill usage, invocation controls, duplicates, and placement
+
+## [2026-08-21] - Melvyn workflow and inline screenshot proof
+
+### Updated Skills
+- `skills/apex/` - Use the configurable Melvyn workflow and preserve every verification screenshot inline in the final response
+- `skills/oneshot/` - Run the official analyze-to-verify workflow and display verification screenshots instead of summarizing them
+- `skills/verify/` - Require current screenshots for visual criteria, render each capture directly, and keep verification active after every subsequent modification in the conversation
+
+### New Workflow Skills
+- `skills/analyze/`, `skills/plan/`, `skills/implement/`, `skills/review/`, and `skills/code-debug/` - Add the official prefix-free Melvyn workflow stack
+
+### Catalog Cleanup
+- Remove legacy `skills/debug-code/`, replaced by `skills/code-debug/`
+- Remove obsolete `skills/skill-workflow-manager/`, whose workflow authoring guidance is owned by `skills/skill-manager/`
+- Remove stale cache-only `clarify` and `crab-review`; retain the canonical `review-code`
+- Remove generic or obsolete `prompt-creator`, `fix-errors`, `fix-grammar`, and `refactor` wrappers
+- Remove `aibuilder-create-saas`; the workflow now lives in the SaaS boilerplate
+- Restore all Free skills in Premium and retain the useful `exa-search`, `explore`, and `find-docs` research skills
+
 ## [2026-08-04] - Canonical workflow skill sync
 
 ### Updated Skills
