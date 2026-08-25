@@ -1,8 +1,8 @@
 ---
 name: environments-manager
 description: Set up per-worktree environments for Claude Code, Cursor, or Codex. Use for worktree-ready repos, IDE environment config, worktree-up/down scripts, or dev.sh wiring.
-disable-model-invocation: false
-allow_implicit_invocation: true
+disable-model-invocation: true
+user-invocable: true
 ---
 
 # Environments Manager

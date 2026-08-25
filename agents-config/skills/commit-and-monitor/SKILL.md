@@ -4,7 +4,7 @@ description: Commit, push, then monitor Vercel deployment and GitHub Actions unt
 argument-hint: "[commit message]"
 allowed-tools: Bash(git :*), Bash(gh :*), Bash(vercel :*), Bash(npm :*), Bash(pnpm :*), Bash(bun :*), Bash(npx :*), Bash(sleep :*)
 disable-model-invocation: true
-allow_implicit_invocation: false
+user-invocable: true
 ---
 
 # Commit and Monitor

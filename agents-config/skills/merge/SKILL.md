@@ -4,7 +4,7 @@ description: Intelligently merge branches with context-aware conflict resolution
 allowed-tools: Bash(git :*), Bash(gh :*), Read, Edit, MultiEdit, Task
 argument-hint: <branch-name>
 disable-model-invocation: true
-allow_implicit_invocation: false
+user-invocable: true
 ---
 
 # Merge

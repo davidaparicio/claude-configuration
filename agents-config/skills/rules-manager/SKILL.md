@@ -2,6 +2,8 @@
 name: rules-manager
 description: Create, edit, and maintain AGENTS.md and .agents/rules/ — tech stack, commands, universal rules, rule index, and rule files. Use to add, modify, restructure, or optimize project rules, conventions, and constraints.
 argument-hint: "[init | add <rule-name> | edit | optimize | task description]"
+disable-model-invocation: true
+user-invocable: true
 ---
 
 <core_principle>

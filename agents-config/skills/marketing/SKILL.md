@@ -1,6 +1,8 @@
 ---
 name: marketing
 description: Build and audit marketing strategy and go-to-market. Use when the user asks for positioning, offers, funnels, launch plans, ads, lead magnets, audience research, brand messaging, or campaign strategy.
+disable-model-invocation: true
+user-invocable: true
 ---
 
 Use this skill when the user asks for marketing strategy, launch plans, positioning, brand messaging, offer design, audience research, funnels, paid ads, content marketing, lead magnets, challenges, or go-to-market thinking.

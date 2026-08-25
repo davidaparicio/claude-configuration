@@ -1,6 +1,8 @@
 ---
 name: use-artifacts
 description: Create Claude-style local HTML artifacts under ~/.agents/artifacts. Use for plans, prototypes, visualizations, dashboards, diagrams, options, or substantial reusable content, with a portable local runtime and no Anthropic API.
+disable-model-invocation: true
+user-invocable: true
 ---
 
 # Use Artifacts

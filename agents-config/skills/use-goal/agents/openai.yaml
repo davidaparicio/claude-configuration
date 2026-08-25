@@ -5,3 +5,6 @@ interface:
   icon_large: "./assets/codex-icon.svg"
   brand_color: "#C70A64"
   default_prompt: "Use $use-goal to help with this task."
+
+policy:
+  allow_implicit_invocation: false

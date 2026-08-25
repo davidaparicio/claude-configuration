@@ -1,36 +1,21 @@
 ---
 name: verify
-description: Prove an implemented GitHub issue works through its real surface. Use when the user invokes $verify or reaches the Melvyn workflow proof gate.
+description: Verify any change, fix, behavior, artifact, workflow, or external state through current evidence from its authoritative surface. Use when the user invokes $verify or asks to verify, prove, check, or demonstrate something.
 disable-model-invocation: true
-argument-hint: "<GitHub issue>"
+argument-hint: "<thing to verify or expected outcome>"
 ---
 
-Read the GitHub issue acceptance criteria and current diff. Treat verification as the completion gate.
+Prove that the explicit `$verify` claim—or, when absent, the latest user request—works through current evidence from its real surface; do not settle for “it probably works.” A GitHub issue and a code diff are optional.
 
-## Persistent verification mode
+1. Define observable pass criteria.
+2. Exercise the real user-facing or authoritative surface. Static checks support runtime proof; they do not replace it.
+3. Capture current evidence:
+   - Visual step: capture a current screenshot and display it inline with Markdown and an absolute path.
+   - Non-visual step: preserve the command or request, output, errors, status, and authoritative read-back.
+4. Mark each criterion `PASS` or `NOT PROVEN`.
 
-Invoking `$verify` activates persistent verification mode for the rest of the current conversation. The user does not need to invoke `$verify` again.
+Keep local or static checks, provider read-back, deployed or public artifacts, and authenticated live behavior as distinct proof layers.
 
-For every subsequent user request that changes code, configuration, data, content, UI, or runtime behavior:
+After any later change, rerun the affected criteria and replace affected visual evidence with fresh screenshots shown inline in the same response.
 
-1. Treat the previous verification as stale immediately after the change.
-2. Re-run the affected real user flow from a valid starting state.
-3. Visually inspect every affected observable state.
-4. Capture new screenshots for every affected visual step.
-5. Show those new screenshots directly in that turn's final response.
-
-Do this after every modification, including small follow-up edits and fixes requested after an earlier PASS. Never reuse screenshots or a PASS from a previous turn. Do not wait for the user to ask for verification again. Persistent verification mode ends only when the conversation ends or the user explicitly disables it.
-
-For every criterion, exercise the real user-facing or authoritative runtime surface, capture current visible or mechanical evidence, inspect relevant errors and durable state, then mark it `PASS` or `NOT PROVEN`.
-
-For every visual criterion and every observable visual step, capture a current screenshot and show it directly in the final response. Embed each local capture with Markdown image syntax and its absolute path, for example:
-
-```markdown
-![F01 — initial state](/absolute/path/F01-initial-state.png)
-```
-
-Do not output screenshot paths without rendering the images. Do not hide the screenshots behind a report, directory, link, or summary. A visual criterion is `NOT PROVEN` until its current screenshot is both captured and displayed to the user. If capture or rendering is unavailable, report `BLOCKED — NOT PROVEN` with the exact blocker.
-
-Static checks alone are not runtime proof. A response to a subsequent implementation-changing request is incomplete until its fresh verification and screenshots have been delivered in the same turn.
-
-Finish only when every criterion passes and every required screenshot appears directly in the final response, or report `BLOCKED — NOT PROVEN` with the exact blocker.
+Finish with `PASS` only when every criterion has current evidence. Otherwise report `BLOCKED — NOT PROVEN` with the exact blocker.
