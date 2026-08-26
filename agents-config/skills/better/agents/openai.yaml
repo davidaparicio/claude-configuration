@@ -1,0 +1,7 @@
+interface:
+  display_name: "Better"
+  short_description: "Cross-discipline interface review"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#3FD192"
+  default_prompt: "Use $better to review this interface across the relevant domains."
