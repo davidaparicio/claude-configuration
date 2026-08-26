@@ -6,7 +6,7 @@ Every section must answer: `What's in it for me?`
 
 Practical rules:
 - Talk about the reader's problem before your solution.
-- Use more `tu/vous/you` than `je/nous/we`, unless the task is personal storytelling.
+- Use second-person pronouns more often than first-person pronouns, unless the task is personal storytelling.
 - Make the reader visualize the lived experience after the click, signup, or purchase.
 - Show pain avoided and pleasure gained.
 

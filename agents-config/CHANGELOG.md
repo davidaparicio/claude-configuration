@@ -1,5 +1,15 @@
 # Claude Code Config Changelog
 
+## [2026-08-26] - Frontend routing skills
+
+### New Routing Skills
+- `skills/better/` - Route holistic interface reviews across accessibility, layout, writing, typography, colors, and UI polish
+- `skills/animate/` - Route animation work to focused implementation, review, performance, accessibility, and prototyping guides
+- `skills/impeccable/` - Route production frontend design work across build, evaluation, refinement, enhancement, and visual iteration commands
+
+### CLI Delivery
+- Ship each router with its complete references, scripts, agents, and assets so `agents pro setup` installs the full routing context by default
+
 ## [2026-08-23] - Manual audit utilities
 
 ### New Misc Skills

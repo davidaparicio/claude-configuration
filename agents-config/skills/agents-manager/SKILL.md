@@ -1,6 +1,8 @@
 ---
 name: agents-manager
 description: Expert guidance for creating, building, and using Claude Code agents and the Task tool. Use when working with agents, setting up agent configurations, understanding how agents work, or using the Task tool to launch specialized agents.
+disable-model-invocation: true
+user-invocable: true
 ---
 
 <objective>

@@ -1,6 +1,8 @@
 ---
 name: use-goal
 description: Use when the user asks to create, draft, set, start, or refine a Codex or Claude Code `/goal` objective for persistent multi-turn work.
+disable-model-invocation: true
+user-invocable: true
 ---
 
 # Use Goal

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Impeccable"
+  short_description: "Design, critique, audit, and polish interfaces"
+  default_prompt: "Use $impeccable to redesign, critique, audit, or polish this frontend."
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#FD8F3E"

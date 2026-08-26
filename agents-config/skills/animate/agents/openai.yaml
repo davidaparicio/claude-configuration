@@ -1,0 +1,7 @@
+interface:
+  display_name: "Animate"
+  short_description: "Route animation work to the right specialist"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#9C66B0"
+  default_prompt: "Use $animate to route and complete this animation task."

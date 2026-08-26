@@ -33,6 +33,8 @@ Persuasion always runs: `Tension (a triggered LF8 lever) -> desire -> action to 
 
 Write to where the reader actually is. Cold copy that assumes readiness fails.
 
+These behavior-change stages are not Eugene Schwartz's awareness levels. For `unaware -> problem aware -> solution aware -> product aware -> most aware`, use `message-strategy-research.md`.
+
 1. Pre-contemplation: does not know you exist or that they have the problem.
 2. Contemplation: aware of the product, thinks it might help one day.
 3. Preparation: considering buying, needs more info on benefits/advantages.

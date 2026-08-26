@@ -5,3 +5,6 @@ interface:
   icon_small: "./assets/codex-icon.svg"
   icon_large: "./assets/codex-icon.svg"
   brand_color: "#2BD96F"
+
+policy:
+  allow_implicit_invocation: false
