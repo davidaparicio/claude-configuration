@@ -1,0 +1,9 @@
+interface:
+  display_name: "Variant"
+  short_description: "Several versions of one UI piece behind a picker"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#8B5CF6"
+  default_prompt: "Use $variant to build several distinct UI versions behind a picker."
+policy:
+  allow_implicit_invocation: false

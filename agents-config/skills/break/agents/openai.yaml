@@ -1,0 +1,9 @@
+interface:
+  display_name: "Break"
+  short_description: "Render one component under hostile inputs and report what breaks"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#F97316"
+  default_prompt: "Use $break to render this component under hostile inputs and report failures."
+policy:
+  allow_implicit_invocation: false
