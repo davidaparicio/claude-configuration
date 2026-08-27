@@ -1,0 +1,10 @@
+interface:
+  display_name: "Verify"
+  short_description: "Prove changes and outcomes with current evidence"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#737373"
+  default_prompt: "Use $verify to prove this outcome from its real surface."
+
+policy:
+  allow_implicit_invocation: true

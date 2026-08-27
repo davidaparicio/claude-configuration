@@ -1,7 +1,6 @@
 ---
 name: verify
 description: Verify any change, fix, behavior, artifact, workflow, or external state through current evidence from its authoritative surface. Use when the user invokes $verify or asks to verify, prove, check, or demonstrate something.
-disable-model-invocation: true
 argument-hint: "<thing to verify or expected outcome>"
 ---
 

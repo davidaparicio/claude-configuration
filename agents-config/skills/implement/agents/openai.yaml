@@ -1,0 +1,10 @@
+interface:
+  display_name: "Implement"
+  short_description: "Implement an agreed request with focused validation"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#737373"
+  default_prompt: "Use $implement to implement the agreed request."
+
+policy:
+  allow_implicit_invocation: false
