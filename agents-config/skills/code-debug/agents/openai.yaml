@@ -1,0 +1,10 @@
+interface:
+  display_name: "Code Debug"
+  short_description: "Debug hard bugs with a red-capable feedback loop"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#737373"
+  default_prompt: "Use $code-debug to diagnose and prove this bug."
+
+policy:
+  allow_implicit_invocation: true

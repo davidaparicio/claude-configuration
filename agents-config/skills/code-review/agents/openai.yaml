@@ -1,0 +1,10 @@
+interface:
+  display_name: "Code Review"
+  short_description: "Review code against its contract and standards"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#737373"
+  default_prompt: "Use $code-review to review this implementation."
+
+policy:
+  allow_implicit_invocation: false

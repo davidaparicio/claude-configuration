@@ -1,5 +1,18 @@
 # Claude Code Config Changelog
 
+## [2026-08-27] - Skill catalog and Codex invocation policies
+
+### New Skill
+- `skills/show-me/` - Explain code, flows, structure, and UI concepts with concise diagrams, sketches, diffs, or focused HTML artifacts
+
+### Codex Invocation Policies
+- Keep `app-icon`, `appstore-connect`, and `hooks-manager` explicit-only across generic skill metadata and Codex policy
+- Allow `verify` to trigger implicitly when the user asks to verify, prove, check, or demonstrate an outcome
+- Add Codex interface and invocation metadata for `code-debug`, `code-review`, `implement`, `oneshot`, `plan`, `show-me`, and `verify`
+
+### Catalog Cleanup
+- Remove `audit`, `explore`, `fix-pr-comments`, `merge`, `prompt`, and `ultrathink`; use `analyze` for exploration and harness-native PR and merge operations
+
 ## [2026-08-26] - Frontend routing skills
 
 ### New Routing Skills

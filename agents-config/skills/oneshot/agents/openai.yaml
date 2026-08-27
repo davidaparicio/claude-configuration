@@ -1,0 +1,10 @@
+interface:
+  display_name: "Oneshot"
+  short_description: "Run the complete workflow from analysis to proof"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#737373"
+  default_prompt: "Use $oneshot to complete this request end to end."
+
+policy:
+  allow_implicit_invocation: false
