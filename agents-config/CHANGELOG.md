@@ -1,5 +1,10 @@
 # Claude Code Config Changelog
 
+## [2026-08-27] - Visual explanation skill
+
+### New Skill
+- `skills/show-me/` - Explain code, flows, structure, and UI concepts with concise diagrams, sketches, diffs, or focused HTML artifacts
+
 ## [2026-08-26] - Frontend routing skills
 
 ### New Routing Skills
