@@ -5,7 +5,7 @@ disable-model-invocation: true
 argument-hint: "<contract and fixed point>"
 ---
 
-Review the implementation from a resolved fixed point on two separate axes:
+Review the implementation from a resolved fixed point on two axes:
 
 1. **Spec** — it satisfies the agreed request, plan, specification, or supplied GitHub issue without missing behavior or scope creep.
 2. **Standards** — it follows the repository rules and remains maintainable.

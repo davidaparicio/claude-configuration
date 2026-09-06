@@ -5,32 +5,14 @@ disable-model-invocation: true
 user-invocable: true
 ---
 
-Use this skill when the user asks for marketing strategy, launch plans, positioning, brand messaging, offer design, audience research, funnels, paid ads, content marketing, lead magnets, challenges, or go-to-market thinking.
+Start from the customer and market, not the product. Separate strategy (who, change, story, difference) from tactics (channels, ads, emails, pages).
 
-Default posture:
-- Start from the customer and market, not the product.
-- Make the smallest viable audience explicit.
-- Separate strategy from tactics. Strategy is who we serve, what change we create, what story we tell, and why we are different. Tactics are channels, ads, emails, posts, launches, and pages.
-- Favor direct-response learning loops: one objective, specific offer, measurable response, follow-up, and iteration.
-- Keep marketing ethical: solve the audience's problem, do not manufacture fake urgency, fake proof, or broad manipulation.
+1. Audience: who has the painful problem, can pay, and wants this change?
+2. Desired change, promise, and differentiated mechanism.
+3. Offer: outcome, inclusions, proof, guarantee, real scarcity, price logic.
+4. Funnel: acquisition, capture, nurture, conversion, retention, referral.
+5. Metrics and the next testable loop.
 
-Core operating loop:
-1. Define the audience: who has the painful problem, can pay, and wants this change?
-2. Define the desired change: what should they believe, do, become, or stop tolerating?
-3. Define the promise: status, power, relief, speed, confidence, belonging, profit, or avoided pain.
-4. Define the differentiated mechanism: why this can work when alternatives fail.
-5. Define the offer: outcome, inclusions, proof, guarantee, scarcity/urgency if real, price logic.
-6. Define the funnel: acquisition, capture, nurture, conversion, retention, referral.
-7. Define metrics and feedback: what must be measured, tested, learned, and changed?
+Load as needed: [strategy.md](references/strategy.md) for market, culture, and story; [one-page-direct-response.md](references/one-page-direct-response.md) for the 9-square plan; [offer-funnel-launch.md](references/offer-funnel-launch.md) for offer, launch, and ads; [brand-positioning.md](references/brand-positioning.md) for positioning axes.
 
-Load references as needed:
-- Open `references/strategy.md` for ethical marketing, the smallest viable market, culture, status, story, tension, and change.
-- Open `references/one-page-direct-response.md` for the 9-square plan, target market (PVP), message, direct-response campaigns, capture, metrics, and follow-up.
-- Open `references/offer-funnel-launch.md` for offer design, the value equation, launch sequencing, challenges, ads by traffic temperature, and urgency.
-- Open `references/brand-positioning.md` for minimum viable branding, brand ethos, enemies, values, mission, positioning axes, and differentiation.
-
-Output expectations:
-- Produce concrete strategy artifacts: positioning statement, campaign plan, funnel map, message hierarchy, launch calendar, ad angles, email sequence, offer stack, or audit findings.
-- Include assumptions when facts are missing.
-- Prefer a strong V1 that can be tested over a bloated theoretical plan.
-- End with the next concrete action or test.
+Return a concrete artifact (positioning, funnel, launch calendar, ad angles, or audit) plus assumptions and the next test. Solve the audience's problem; do not invent fake urgency or proof.
