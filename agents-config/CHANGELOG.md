@@ -1,5 +1,10 @@
 # Claude Code Config Changelog
 
+## [2026-09-07] - Generic commit-and-monitor
+
+### Updated Skills
+- `skills/commit-and-monitor/` - Watch the repo's CI and deploy instead of assuming Vercel and GitHub Actions
+
 ## [2026-09-06] - Safe ship
 
 ### New Skill

@@ -1,6 +1,6 @@
 interface:
   display_name: "Commit And Monitor"
-  short_description: "Commit, push, then monitor Vercel deployment and GitHub..."
+  short_description: "Commit, push, then monitor CI and the project's deploy..."
   icon_small: "./assets/codex-icon.svg"
   icon_large: "./assets/codex-icon.svg"
   brand_color: "#B6681B"
