@@ -1,117 +1,15 @@
 ---
 name: sync-aiblueprint-with-claude
-description: Sync NEW files from this repository to ~/.claude
+description: Copy only NEW files from this repo's claude-code-config into ~/.claude. Use when asked to push new config files to Claude without overwriting existing ones.
 allowed-tools: Bash(cp :*), Bash(diff :*), Bash(ls :*), Bash(cat :*), Bash(mkdir :*), Bash(find :*), Bash(date :*), Read, Write, Edit
 ---
 
-# Sync NEW Files to ~/.claude
+Copy only files that exist in `$CWD/claude-code-config` and not in `~/.claude`. Copy each file individually. Never rsync, never overwrite, never delete target-only files.
 
-Sync automation specialist. Find and copy ONLY NEW files from claude-code-config TO ~/.claude.
+Check `commands/`, `skills/`, `agents/`, `scripts/statusline/`, and `scripts/command-validator/`.
 
-## Configuration
+1. `diff -rq` each pair. Keep `Only in …claude-code-config`. Ignore target-only files and `Files … differ`.
+2. `mkdir -p` then `cp` each new file. For scripts, copy `.ts` `.js` `.json` `.md`; skip `node_modules/`, `data/`, `*.db`, `*.log`.
+3. Prepend those paths to `$CWD/claude-code-config/CHANGELOG.md`.
 
-- **Source**: `$CWD/claude-code-config`
-- **Target**: `~/.claude`
-- **Changelog**: `$CWD/claude-code-config/CHANGELOG.md`
-
-## Critical Rules
-
-1. **ONLY copy NEW files** - files that exist in source but NOT in target
-2. **Copy files INDIVIDUALLY** - never use rsync or bulk copy
-3. **Preserve directory structure** - create parent dirs if needed
-4. **Track each file** - list every file copied in changelog
-
-## Directories to Check
-
-1. **commands/** - Slash commands (.md files and subdirectories)
-2. **skills/** - Skills (subdirectories with SKILL.md)
-3. **agents/** - Agent definitions (.md files)
-4. **scripts/statusline/** - Statusline script (source code only)
-5. **scripts/command-validator/** - Command validator (source code only)
-
-## Workflow
-
-### Step 1: Find NEW Files Only
-
-For each directory, find files that exist in claude-code-config but NOT in ~/.claude:
-
-```bash
-diff -rq $CWD/claude-code-config/commands/ ~/.claude/commands/ 2>/dev/null | grep "Only in.*claude-code-config"
-```
-
-Output interpretation:
-- `Only in /path/claude-code-config/commands: new-cmd.md` → NEW file
-- `Only in /path/claude-code-config/commands/utils: helper.md` → NEW file in subdir
-
-**IGNORE**:
-- `Only in /Users/melvynx/.claude/...` (files only in target - don't delete)
-- `Files ... differ` (modified files - don't overwrite)
-
-### Step 2: Copy Each NEW File Individually
-
-```bash
-# New file in root
-cp $CWD/claude-code-config/commands/new-cmd.md ~/.claude/commands/new-cmd.md
-
-# New file in subdirectory (create dir first if needed)
-mkdir -p ~/.claude/commands/utils/
-cp $CWD/claude-code-config/commands/utils/helper.md ~/.claude/commands/utils/helper.md
-
-# New skill folder
-mkdir -p ~/.claude/skills/new-skill/
-cp $CWD/claude-code-config/skills/new-skill/SKILL.md ~/.claude/skills/new-skill/SKILL.md
-```
-
-### Step 3: Scripts - Copy Source Files Only
-
-For scripts/statusline and scripts/command-validator:
-- **COPY**: `.ts`, `.js`, `.json` (package.json, tsconfig.json), `.md` files
-- **SKIP**: `node_modules/`, `data/`, `*.db`, `*.log`, cache files
-
-### Step 4: Update CHANGELOG.md
-
-Prepend new entry with ONLY the new files copied:
-
-```markdown
-# Claude Code Config Sync Changelog
-
-## [YYYY-MM-DD HH:MM:SS] - Synced TO ~/.claude
-
-### New Commands
-- `commands/new-cmd.md` → ~/.claude/commands/
-
-### New Skills
-- `skills/new-skill/` → ~/.claude/skills/
-
-### New Agents
-- `agents/new-agent.md` → ~/.claude/agents/
-
-### Scripts Updated
-- `scripts/statusline/src/new-file.ts` → ~/.claude/scripts/
-
----
-```
-
-## Forbidden Actions
-
-- ❌ Do NOT use rsync
-- ❌ Do NOT copy entire directories
-- ❌ Do NOT overwrite existing files (even if different)
-- ❌ Do NOT copy node_modules, data/, .db, .log files
-- ❌ Do NOT delete files that only exist in target (~/.claude)
-
-## Output Summary
-
-```
-✅ Sync to ~/.claude Complete - [timestamp]
-
-New files copied to ~/.claude:
-- commands/new-cmd.md
-- skills/new-skill/SKILL.md
-
-📝 CHANGELOG.md updated
-```
-
----
-
-User: Sync now #$ARGUMENTS
+Report the copied paths. Do not commit.

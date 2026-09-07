@@ -1,5 +1,10 @@
 # Claude Code Config Changelog
 
+## [2026-09-06] - Safe ship
+
+### New Skill
+- `skills/safe-ship/` - Inspect dirty state, scope the stage, run targeted validation, then commit, push, and verify remote gates without mixing unrelated work
+
 ## [2026-08-27] - Skill catalog and Codex invocation policies
 
 ### New Skill

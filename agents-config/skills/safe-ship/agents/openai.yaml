@@ -1,0 +1,7 @@
+interface:
+  display_name: "Safe Ship"
+  short_description: "Inspect, validate, commit, and push scoped changes"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#2F0EF5"
+  default_prompt: "Use $safe-ship to help with this task."
