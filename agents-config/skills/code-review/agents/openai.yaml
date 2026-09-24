@@ -7,4 +7,4 @@ interface:
   default_prompt: "Use $code-review to review this implementation."
 
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

@@ -7,4 +7,4 @@ interface:
   default_prompt: "Use $plan to prepare an implementation-ready plan."
 
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

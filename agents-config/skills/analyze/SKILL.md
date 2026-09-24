@@ -1,7 +1,6 @@
 ---
 name: analyze
 description: Analyze a requested change before planning or implementation. Use when the user invokes $analyze or starts the APEX workflow.
-disable-model-invocation: true
 argument-hint: "<request>"
 ---
 
