@@ -1,5 +1,10 @@
 # Claude Code Config Changelog
 
+## [2026-09-25] - Test audit skill
+
+### New Skill
+- `skills/test-audit/` - Gate new tests against a value bar and audit low-value, implementation-coupled, or duplicate tests; adapted from OpenClaw (MIT)
+
 ## [2026-09-07] - Generic commit-and-monitor
 
 ### Updated Skills
