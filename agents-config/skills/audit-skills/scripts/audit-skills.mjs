@@ -45,7 +45,10 @@ const readText = (path) => {
   }
 };
 
-const parseFrontmatter = (text) => {
+const parseFrontmatter = (raw) => {
+  // Skills checked out on Windows are CRLF; without this every field reads
+  // as absent, so explicit-only controls look unset on every skill.
+  const text = raw.replace(/\r\n/g, "\n");
   if (!text.startsWith("---\n")) return {};
   const end = text.indexOf("\n---", 4);
   if (end < 0) return {};
@@ -57,6 +60,10 @@ const parseFrontmatter = (text) => {
   }
   return result;
 };
+
+// A stage call is a list item whose content opens with a backticked `$skill`
+// reference, e.g. "1. `$analyze`". Inline prose mentions are not calls.
+const STAGE_CALL = /^[ \t]*(?:\d+\.|[-*])[ \t]+`\$([a-z0-9][a-z0-9-]*)`/gm;
 
 const inventoryRoot = (root, scope) => {
   if (!existsSync(root)) return [];
@@ -82,6 +89,7 @@ const inventoryRoot = (root, scope) => {
         claude_explicit_only: metadata["disable-model-invocation"] === "true",
         codex_explicit_only: /allow_implicit_invocation:\s*false\b/.test(openai),
         direct_user_intent: invocationGuard.test(body.slice(0, 2500)),
+        stage_calls: [...new Set([...body.matchAll(STAGE_CALL)].map((match) => match[1]))].filter((stage) => stage !== (metadata.name || entry.name)),
         project_references: projectReferences,
         project_runtime_references: projectReferences.filter((path) => path.includes("/scripts/") || path.includes("/agents/")),
       };
@@ -90,6 +98,7 @@ const inventoryRoot = (root, scope) => {
 };
 
 const skills = [...inventoryRoot(globalRoot, "global"), ...inventoryRoot(localRoot, "project")];
+const orchestratedStages = new Set(skills.flatMap((skill) => skill.stage_calls));
 const names = [...new Set(skills.map((skill) => skill.name))].sort((a, b) => b.length - a.length);
 const usage = new Map(names.map((name) => [name, {
   user: 0,
@@ -261,12 +270,24 @@ const rows = skills.map((skill) => {
   if (observed.nativeModel > 0) classifications.push("OBSERVED_MODEL");
   if (observed.manifestRead > 0) classifications.push("MANIFEST_READ_EVIDENCE");
   if (observed.user + observed.nativeModel + observed.manifestRead === 0) classifications.push("UNOBSERVED");
-  if (skill.claude_explicit_only && skill.codex_explicit_only) classifications.push("EXPLICIT_ONLY");
-  if (skill.claude_explicit_only !== skill.codex_explicit_only) {
+  // A stage another skill calls (apex -> `$analyze`) must stay model-invocable.
+  // Claude Code's `disable-model-invocation` forbids every model call, unlike
+  // Codex's `allow_implicit_invocation: false`, which still honours an explicit
+  // `$skill`. Mirroring one onto the other kills the orchestrator on its first
+  // stage, so an orchestrated stage is never a mismatch to be mirrored.
+  const orchestrated = orchestratedStages.has(skill.name);
+  if (orchestrated && skill.claude_explicit_only) {
+    classifications.push("ORCHESTRATION_BLOCKED");
+    recommendations.push("drop-claude-explicit-only");
+  } else if (orchestrated) {
+    classifications.push("ORCHESTRATED_STAGE");
+  } else if (skill.claude_explicit_only && skill.codex_explicit_only) {
+    classifications.push("EXPLICIT_ONLY");
+  } else if (skill.claude_explicit_only !== skill.codex_explicit_only) {
     classifications.push("INVOCATION_MISMATCH");
     recommendations.push("mirror-explicit-only-control");
   }
-  if (skill.direct_user_intent && !(skill.claude_explicit_only && skill.codex_explicit_only)) {
+  if (!orchestrated && skill.direct_user_intent && !(skill.claude_explicit_only && skill.codex_explicit_only)) {
     recommendations.push("make-explicit-only");
   }
   if (duplicateNames.has(skill.name)) classifications.push("NAME_COLLISION");
@@ -315,6 +336,7 @@ const result = {
     unobserved: rows.filter((row) => row.classifications.includes("UNOBSERVED")).length,
     explicit_only: rows.filter((row) => row.classifications.includes("EXPLICIT_ONLY")).length,
     invocation_mismatches: rows.filter((row) => row.classifications.includes("INVOCATION_MISMATCH")).length,
+    orchestration_blocked: rows.filter((row) => row.classifications.includes("ORCHESTRATION_BLOCKED")).length,
     locality_candidates: rows.filter((row) => row.classifications.includes("LOCALITY_CANDIDATE")).length,
     name_collisions: duplicateNames.size,
   },
@@ -331,16 +353,20 @@ console.log(`\n- Project: \`${projectRoot}\``);
 console.log(`- Coverage: ${result.coverage.transcript_files} transcript files; ${result.coverage.matched_jsonl_records} relevant records parsed`);
 console.log(`- Time range observed: ${earliest || "unknown"} → ${latest || "unknown"}`);
 console.log(`- Skills: ${result.summary.skill_rows} rows / ${result.summary.unique_names} unique names`);
-console.log(`- Unobserved: ${result.summary.unobserved}; explicit-only: ${result.summary.explicit_only}; invocation mismatches: ${result.summary.invocation_mismatches}`);
+console.log(`- Unobserved: ${result.summary.unobserved}; explicit-only: ${result.summary.explicit_only}; invocation mismatches: ${result.summary.invocation_mismatches}; orchestration blocked: ${result.summary.orchestration_blocked}`);
 console.log(`- Locality candidates: ${result.summary.locality_candidates}; name collisions: ${result.summary.name_collisions}`);
 console.log(`- Codex/Cursor model invocation: NOT INSTRUMENTED; manifest reads are heuristic only`);
 console.log("\n| Skill | Scope | User | Claude native | Manifest read | Invocation | Classification | Recommendation |");
 console.log("|---|---:|---:|---:|---:|---|---|---|");
 for (const row of rows) {
-  const invocation = row.claude_explicit_only && row.codex_explicit_only
-    ? "explicit-only"
-    : row.claude_explicit_only || row.codex_explicit_only
-      ? "mismatch"
-      : "implicit";
+  const invocation = row.classifications.includes("ORCHESTRATION_BLOCKED")
+    ? "blocked-stage"
+    : row.classifications.includes("ORCHESTRATED_STAGE")
+      ? "stage"
+      : row.claude_explicit_only && row.codex_explicit_only
+        ? "explicit-only"
+        : row.claude_explicit_only || row.codex_explicit_only
+          ? "mismatch"
+          : "implicit";
   console.log(`| ${row.name} | ${row.scope} | ${row.usage.user_explicit} | ${row.usage.native_model} | ${row.usage.manifest_read_evidence} | ${invocation} | ${row.classifications.join(", ") || "-"} | ${row.recommendations.join(", ") || "-"} |`);
 }
