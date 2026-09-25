@@ -1,7 +1,6 @@
 ---
 name: plan
 description: Turn an analyzed request into an implementation-ready plan, optionally backed by a GitHub issue. Use when the user invokes $plan or continues the APEX workflow.
-disable-model-invocation: true
 argument-hint: "<analysis or request>"
 ---
 

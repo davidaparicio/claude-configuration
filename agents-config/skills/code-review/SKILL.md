@@ -1,7 +1,6 @@
 ---
 name: code-review
 description: Review code against its agreed request, plan, specification, or optional GitHub issue plus repository standards. Use when the user invokes $code-review or Apex reaches its review stage.
-disable-model-invocation: true
 argument-hint: "<contract and fixed point>"
 ---
 
