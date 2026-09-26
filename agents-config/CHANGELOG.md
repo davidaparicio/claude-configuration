@@ -1,5 +1,15 @@
 # Claude Code Config Changelog
 
+## [2026-09-25] - APEX stage orchestration guard
+
+### Updated Skills
+- `skills/analyze/`, `skills/plan/`, `skills/implement/`, `skills/code-review/` - Drop `disable-model-invocation` so `apex` and `oneshot` can call their stages through the Skill tool
+- `skills/analyze/` - Add the missing `agents/openai.yaml` and `assets/codex-icon.svg` so the stage ships complete like its siblings
+- `skills/audit-skills/` - Classify orchestrated stages separately and never recommend mirroring Claude's explicit-only control onto them; parse CRLF frontmatter
+
+### Tests
+- `tests/skill-invocation.test.ts` - Build the call graph from SKILL.md files and assert every called stage exists and stays model-invocable
+
 ## [2026-09-25] - Test audit skill
 
 ### New Skill

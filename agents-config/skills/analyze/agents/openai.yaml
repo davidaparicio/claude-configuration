@@ -1,0 +1,10 @@
+interface:
+  display_name: "Analyze"
+  short_description: "Analyze a requested change before planning or implementation"
+  icon_small: "./assets/codex-icon.svg"
+  icon_large: "./assets/codex-icon.svg"
+  brand_color: "#737373"
+  default_prompt: "Use $analyze to analyze this request before planning."
+
+policy:
+  allow_implicit_invocation: true
